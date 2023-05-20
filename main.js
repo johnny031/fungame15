@@ -33,7 +33,7 @@ function resize_board() {
   }
 }
 
-function remove_piece(destination_cell) {
+function move_piece(destination_cell) {
   $(".selected").detach().appendTo(destination_cell);
   $(".selected").attr("data-used", "1");
   $(".selected").removeClass("selected");
@@ -196,7 +196,7 @@ $(".piece").on("click", function (event) {
       // 如果行動棋子比目標棋子小，或(從場外拿棋子欲蓋住對方棋子時，對方尚未3子連線)
       return false;
     }
-    remove_piece($(this).parent(".cell"));
+    move_piece($(this).parent(".cell"));
     return false;
   }
 
@@ -218,8 +218,10 @@ $(".piece").on("click", function (event) {
 
 $(".cell").on("click", function (event) {
   event.stopPropagation();
-  if (!select) {
+
+  // 如果目前沒有已選取的棋子，或該cell內已有棋子
+  if (!select || $(this).children().length > 0) {
     return false;
   }
-  remove_piece($(this));
+  move_piece($(this));
 });
