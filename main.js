@@ -46,10 +46,6 @@ function remove_piece(destination_cell) {
   }, 200);
 }
 
-$("body").on("click", function () {
-  console.log(if_N_pieces_in_line(3));
-});
-
 function if_N_pieces_in_line(number) {
   let pieces_location = [];
   let check_null = false;
