@@ -395,7 +395,7 @@ $(document).on("click", ".cell", function (event) {
 });
 
 $(document).on("dblclick", ".timer_section", function () {
-  confirm("請問要將設定改為「限制時間」嗎")
+  confirm("請問要將設定改為「限制時間」嗎？\n若點選取消，則改為「不限制時間」")
     ? (timer_on = true)
     : (timer_on = false);
 });
