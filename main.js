@@ -46,9 +46,12 @@ function move_piece(destination_cell) {
   }, 200);
 }
 
+$("body").on("click", function () {
+  console.log(if_N_pieces_in_line(3));
+});
+
 function if_N_pieces_in_line(number) {
   let pieces_location = [];
-  let check_null = false;
   let count_white = 0;
   let count_black = 0;
 
@@ -63,10 +66,6 @@ function if_N_pieces_in_line(number) {
 
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
-      // 如果這一列中有null存在
-      if (pieces_location[i][j] == null) {
-        check_null = true;
-      }
       if (pieces_location[i][j] === "0") {
         count_white++;
       }
@@ -74,27 +73,16 @@ function if_N_pieces_in_line(number) {
         count_black++;
       }
       if (j === 3) {
-        if (count_white >= number || count_black >= number) {
-          //如果這一列中有三個同色的棋子，且這一列中沒有null存在
-          if (number === 3 && !check_null) {
-            return false;
-          }
-          if (count_white >= number) return "0";
-          if (count_black >= number) return "1";
-        }
+        if (count_white >= number) return "0";
+        if (count_black >= number) return "1";
       }
     }
     count_white = 0;
     count_black = 0;
-    check_null = false;
   }
 
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
-      // 如果這一列中有null存在
-      if (pieces_location[j][i] == null) {
-        check_null = true;
-      }
       if (pieces_location[j][i] === "0") {
         count_white++;
       }
@@ -102,26 +90,15 @@ function if_N_pieces_in_line(number) {
         count_black++;
       }
       if (j === 3) {
-        if (count_white >= number || count_black >= number) {
-          //如果這一列中有三個同色的棋子，且這一列中沒有null存在
-          if (number === 3 && !check_null) {
-            return false;
-          }
-          if (count_white >= number) return "0";
-          if (count_black >= number) return "1";
-        }
+        if (count_white >= number) return "0";
+        if (count_black >= number) return "1";
       }
     }
     count_white = 0;
     count_black = 0;
-    check_null = false;
   }
 
   for (let i = 0; i < 4; i++) {
-    // 如果這一列中有null存在
-    if (pieces_location[i][i] == null) {
-      check_null = true;
-    }
     if (pieces_location[i][i] === "0") {
       count_white++;
     }
@@ -129,25 +106,14 @@ function if_N_pieces_in_line(number) {
       count_black++;
     }
     if (i === 3) {
-      if (count_white >= number || count_black >= number) {
-        //如果這一列中有三個同色的棋子，且這一列中沒有null存在
-        if (number === 3 && !check_null) {
-          return false;
-        }
-        if (count_white >= number) return "0";
-        if (count_black >= number) return "1";
-      }
+      if (count_white >= number) return "0";
+      if (count_black >= number) return "1";
     }
   }
   count_white = 0;
   count_black = 0;
-  check_null = false;
 
   for (let i = 0, j = 3; i < 4, j >= 0; i++, j--) {
-    // 如果這一列中有null存在
-    if (pieces_location[i][j] == null) {
-      check_null = true;
-    }
     if (pieces_location[i][j] === "0") {
       count_white++;
     }
@@ -155,14 +121,8 @@ function if_N_pieces_in_line(number) {
       count_black++;
     }
     if (i === 3) {
-      if (count_white >= number || count_black >= number) {
-        //如果這一列中有三個同色的棋子，且這一列中沒有null存在
-        if (number === 3 && !check_null) {
-          return false;
-        }
-        if (count_white >= number) return "0";
-        if (count_black >= number) return "1";
-      }
+      if (count_white >= number) return "0";
+      if (count_black >= number) return "1";
     }
   }
   return false;
