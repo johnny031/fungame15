@@ -167,6 +167,7 @@ function move_piece(destination_cell) {
         round === 1
           ? alert("黑方獲勝!\n(拿起棋子時對方已經獲勝)")
           : alert("白方獲勝!\n(拿起棋子時對方已經獲勝)");
+        confirm("是否重置盤面?") && render_board();
         return false;
       }
       if_4_black_pieces_in_line && alert("黑方獲勝!");
