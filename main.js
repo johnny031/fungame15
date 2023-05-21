@@ -40,20 +40,31 @@ function move_piece(destination_cell) {
   select = false;
   round = 1 - round;
   setTimeout(() => {
-    if (if_N_pieces_in_line(4)) {
-      if_N_pieces_in_line(4) === "1" ? alert("黑方獲勝!") : alert("白方獲勝!");
+    let if_4_black_pieces_in_line =
+      jQuery.inArray(1, if_N_pieces_in_line(4)) !== -1;
+    let if_4_white_pieces_in_line =
+      jQuery.inArray(0, if_N_pieces_in_line(4)) !== -1;
+
+    // 若發現有四子連線
+    if (if_N_pieces_in_line(4).length !== 0) {
+      //若黑白雙方均有四子連線，拿起棋子時對方已勝利
+      if (if_4_black_pieces_in_line && if_4_white_pieces_in_line) {
+        round === 1
+          ? alert("黑方獲勝!\n(拿起棋子時對方已經獲勝)")
+          : alert("白方獲勝!\n(拿起棋子時對方已經獲勝)");
+        return false;
+      }
+      if_4_black_pieces_in_line && alert("黑方獲勝!");
+      if_4_white_pieces_in_line && alert("白方獲勝!");
     }
   }, 200);
 }
-
-$("body").on("click", function () {
-  console.log(if_N_pieces_in_line(3));
-});
 
 function if_N_pieces_in_line(number) {
   let pieces_location = [];
   let count_white = 0;
   let count_black = 0;
+  let which_color_has_N_pieces_in_line = [];
 
   $(".cell").each(function (index) {
     if (index % 4 === 0) {
@@ -73,8 +84,8 @@ function if_N_pieces_in_line(number) {
         count_black++;
       }
       if (j === 3) {
-        if (count_white >= number) return "0";
-        if (count_black >= number) return "1";
+        if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
+        if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
       }
     }
     count_white = 0;
@@ -90,8 +101,8 @@ function if_N_pieces_in_line(number) {
         count_black++;
       }
       if (j === 3) {
-        if (count_white >= number) return "0";
-        if (count_black >= number) return "1";
+        if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
+        if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
       }
     }
     count_white = 0;
@@ -106,8 +117,8 @@ function if_N_pieces_in_line(number) {
       count_black++;
     }
     if (i === 3) {
-      if (count_white >= number) return "0";
-      if (count_black >= number) return "1";
+      if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
+      if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
     }
   }
   count_white = 0;
@@ -121,11 +132,12 @@ function if_N_pieces_in_line(number) {
       count_black++;
     }
     if (i === 3) {
-      if (count_white >= number) return "0";
-      if (count_black >= number) return "1";
+      if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
+      if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
     }
   }
-  return false;
+
+  return which_color_has_N_pieces_in_line;
 }
 
 resize_board();
@@ -151,7 +163,7 @@ $(".piece").on("click", function (event) {
         parseInt($(this).attr("data-size")) ||
       (parseInt($(this).attr("data-color")) === 1 - round &&
         $(".selected").attr("data-used") === "0" &&
-        parseInt(if_N_pieces_in_line(3)) !== 1 - round)
+        jQuery.inArray(1 - round, if_N_pieces_in_line(3)) === -1)
     ) {
       // 如果行動棋子比目標棋子小，或(從場外拿棋子欲蓋住對方棋子時，對方尚未3子連線)
       return false;
