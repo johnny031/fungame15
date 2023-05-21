@@ -2,8 +2,11 @@ let select = false;
 let round = 1; // 1=black 0=white
 let interval_b;
 let interval_w;
-let timer_b = 1;
-let timer_w = 1;
+let interval_timer_bar_b;
+let interval_timer_bar_w;
+let timer_b = 4;
+let timer_w = 4;
+let timer_on = false;
 
 function vh(percent) {
   var h = Math.max(
@@ -30,35 +33,71 @@ function vmax(percent) {
 }
 
 function startTimer_b() {
-  let seconds, minutes;
+  let seconds;
 
   interval_b = setInterval(function () {
     seconds = parseInt(timer_b % 60, 10);
-    minutes = parseInt(timer_b / 60, 10);
-    seconds = seconds < 10 && seconds >= 0 ? "0" + seconds : seconds;
-    minutes = minutes < 10 && minutes >= 0 ? "0" + minutes : minutes;
 
     $("#second_b").text(seconds);
-    $("#minute_b").text(minutes);
 
-    timer_b++;
+    if (--timer_b < 0) {
+      clearInterval(interval_b);
+      if (timer_on) {
+        change_round();
+      }
+    }
   }, 1000);
 }
 
 function startTimer_w() {
-  let seconds, minutes;
+  let seconds;
 
   interval_w = setInterval(function () {
     seconds = parseInt(timer_w % 60, 10);
-    minutes = parseInt(timer_w / 60, 10);
-    seconds = seconds < 10 && seconds >= 0 ? "0" + seconds : seconds;
-    minutes = minutes < 10 && minutes >= 0 ? "0" + minutes : minutes;
 
     $("#second_w").text(seconds);
-    $("#minute_w").text(minutes);
 
-    timer_w++;
+    if (--timer_w < 0) {
+      clearInterval(interval_w);
+      if (timer_on) {
+        change_round();
+      }
+    }
   }, 1000);
+}
+
+function startTimerBar_w() {
+  interval_timer_bar_w = setInterval(frame, 10);
+  let width = (timer_w + 1) * 100;
+
+  function frame() {
+    if (width <= 0) {
+      clearInterval(interval_timer_bar_w);
+    } else {
+      width--;
+      if (width < 300 && timer_on) {
+        $("#second_w").addClass("shake");
+      }
+      $(".timer-bar.white").attr("style", `--bar-width: ${width / 40}%`);
+    }
+  }
+}
+
+function startTimerBar_b() {
+  interval_timer_bar_b = setInterval(frame, 10);
+  let width = (timer_b + 1) * 100;
+
+  function frame() {
+    if (width <= 0) {
+      clearInterval(interval_timer_bar_b);
+    } else {
+      width--;
+      if (width < 300 && timer_on) {
+        $("#second_b").addClass("shake");
+      }
+      $(".timer-bar.black").attr("style", `--bar-width: ${width / 40}%`);
+    }
+  }
 }
 
 function resize_board() {
@@ -76,14 +115,40 @@ function resize_board() {
   }
 }
 
+function change_round() {
+  select = false;
+  $(".selected").removeClass("selected");
+  round = 1 - round;
+  round === 1 ? (timer_w += 10) : (timer_b += 10);
+  round === 1 ? startTimer_b() : startTimer_w();
+  round === 1 ? startTimerBar_b() : startTimerBar_w();
+  round === 1 ? clearInterval(interval_w) : clearInterval(interval_b);
+  round === 1
+    ? clearInterval(interval_timer_bar_w)
+    : clearInterval(interval_timer_bar_b);
+
+  if (timer_b >= 39) timer_b = 39;
+  if (timer_w >= 39) timer_w = 39;
+
+  $("#second_w, #second_b").removeClass("shake");
+
+  $("#second_b").text(timer_b + 1);
+  $("#second_w").text(timer_w + 1);
+
+  $(".timer-bar.black").attr(
+    "style",
+    `--bar-width: ${(100 * (timer_b + 1)) / 40}%`
+  );
+  $(".timer-bar.white").attr(
+    "style",
+    `--bar-width: ${(100 * (timer_w + 1)) / 40}%`
+  );
+}
+
 function move_piece(destination_cell) {
   $(".selected").detach().appendTo(destination_cell);
   $(".selected").attr("data-used", "1");
-  $(".selected").removeClass("selected");
-  select = false;
-  round = 1 - round;
-  round === 1 ? startTimer_b() : startTimer_w();
-  round === 1 ? clearInterval(interval_w) : clearInterval(interval_b);
+  change_round();
 
   setTimeout(() => {
     let if_4_black_pieces_in_line =
@@ -95,6 +160,8 @@ function move_piece(destination_cell) {
     if (if_N_pieces_in_line(4).length !== 0) {
       clearInterval(interval_b);
       clearInterval(interval_w);
+      clearInterval(interval_timer_bar_b);
+      clearInterval(interval_timer_bar_w);
       //若黑白雙方均有四子連線，拿起棋子時對方已勝利
       if (if_4_black_pieces_in_line && if_4_white_pieces_in_line) {
         round === 1
@@ -112,13 +179,14 @@ function move_piece(destination_cell) {
 
 function render_board() {
   round = 1;
-  timer_b = 1;
-  timer_w = 1;
 
   $(".container").empty();
   $(".container").append(`
     <div class="timer_section">
-      <span id="minute_b">00</span>:<span id="second_b">00</span>
+      <div class="timer-bar-wrapper">
+        <div class="timer-bar black"></div>
+      </div>
+      <span class="timer-number" id="second_b">5</span>
     </div>
     <div class="piece-section">
       <div class="piece-stack">
@@ -179,7 +247,10 @@ function render_board() {
       </div>
     </div>
     <div class="timer_section">
-      <span id="minute_w">00</span>:<span id="second_w">00</span>
+      <div class="timer-bar-wrapper">
+        <div class="timer-bar white"></div>
+      </div>
+      <span class="timer-number" id="second_w">5</span>
     </div>
   `);
 }
@@ -321,4 +392,10 @@ $(document).on("click", ".cell", function (event) {
     return false;
   }
   move_piece($(this));
+});
+
+$(document).on("dblclick", ".timer_section", function () {
+  confirm("請問要將設定改為「限制時間」嗎")
+    ? (timer_on = true)
+    : (timer_on = false);
 });

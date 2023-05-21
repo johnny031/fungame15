@@ -6,6 +6,7 @@
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -ms-user-select: none;
+  font-family: Arial;
 }
 
 body {
@@ -100,12 +101,54 @@ body {
 }
 
 .timer_section {
+  --color1: hsl(120, 34%, 62%);
+  --color2: hsl(120, 53%, 20%);
+  --color3: hsl(120, 38%, 44%);
   width: var(--piece-section-length);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .timer_section:first-of-type {
   transform: rotate(180deg);
+}
+
+.timer-bar-wrapper {
+  width: 100%;
+  background-color: #ddd;
+  box-shadow: inset 0 0 8px #c8c8c8;
+  border-radius: 1rem;
+}
+
+.timer-bar {
+  --bar-width: 12.5%;
+  width: var(--bar-width);
+  height: 4vmin;
+  border-radius: 1rem;
+  background: linear-gradient(to bottom, var(--color1), var(--color2));
+}
+
+.timer-number {
+  margin-left: 5px;
+  font-size: 4.5vmin;
+  color: var(--color3);
+  font-weight: bold;
+  width: 0;
+  transform: rotate(var(--rotate, 0deg)) translate(0, var(--shake, 0px));
+}
+
+.shake {
+  animation: shake 0.5s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes shake {
+  10%, 90% { --shake: -0.5px; }
+  20%, 80% { --shake: +1px; }
+  30%, 70% { --shake: -2px; }
+  40%, 60% { --shake: +2px; }
+  50% { --shake: -2px; }
 }
 
 @media (orientation: landscape) {
@@ -124,14 +167,11 @@ body {
   .timer_section {
     width: auto;
     height: var(--piece-section-length);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transform: rotate(-90deg);
+    flex-direction: column-reverse;
   }
 
-  .timer_section:first-of-type {
-    transform: rotate(90deg);
+  .timer-number {
+    --rotate: -90deg;
   }
 
   .piece-stack {
@@ -139,6 +179,16 @@ body {
     width: calc(var(--piece-section-width) - 2vmin);
     max-width: calc(var(--piece-section-length) / 4);
   }
+
+  .timer-bar-wrapper {
+    height: 100%;
+  }
+  
+  .timer-bar {
+    height: var(--bar-width);
+    width: 4vmin;
+    background: linear-gradient(to right, var(--color1), var(--color2));
+}
 }
 
 @media screen and (min-width: 800px) {
