@@ -112,6 +112,9 @@ body {
 
 .timer_section:first-of-type {
   transform: rotate(180deg);
+  -webkit-transform: rotate(180deg); /* Safari & Chrome */
+  -moz-transform: rotate(180deg); /* Firefox */
+  -ms-transform: rotate(180deg); /* Internet Explorer */
 }
 
 .timer-bar-wrapper {
@@ -136,6 +139,9 @@ body {
   font-weight: bold;
   width: 0;
   transform: rotate(var(--rotate, 0deg)) translate(0, var(--shake, 0px));
+  -webkit-transform: rotate(var(--rotate, 0deg)) translate(0, var(--shake, 0px)); /* Safari & Chrome */
+  -moz-transform: rotate(var(--rotate, 0deg)) translate(0, var(--shake, 0px)); /* Firefox */
+  -ms-transform: rotate(var(--rotate, 0deg)) translate(0, var(--shake, 0px)); /* Internet Explorer */
 }
 
 .shake {
@@ -144,6 +150,14 @@ body {
 }
 
 @keyframes shake {
+  10%, 90% { --shake: -0.5px; }
+  20%, 80% { --shake: +1px; }
+  30%, 70% { --shake: -2px; }
+  40%, 60% { --shake: +2px; }
+  50% { --shake: -2px; }
+}
+
+@-webkit-keyframes shake {
   10%, 90% { --shake: -0.5px; }
   20%, 80% { --shake: +1px; }
   30%, 70% { --shake: -2px; }
