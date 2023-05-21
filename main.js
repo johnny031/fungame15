@@ -1,5 +1,9 @@
 let select = false;
 let round = 1; // 1=black 0=white
+let interval_b;
+let interval_w;
+let timer_b = 1;
+let timer_w = 1;
 
 function vh(percent) {
   var h = Math.max(
@@ -25,8 +29,47 @@ function vmax(percent) {
   return Math.max(vh(percent), vw(percent));
 }
 
+function startTimer_b() {
+  let seconds, minutes;
+
+  interval_b = setInterval(function () {
+    seconds = parseInt(timer_b % 60, 10);
+    minutes = parseInt(timer_b / 60, 10);
+    seconds = seconds < 10 && seconds >= 0 ? "0" + seconds : seconds;
+    minutes = minutes < 10 && minutes >= 0 ? "0" + minutes : minutes;
+
+    $("#second_b").text(seconds);
+    $("#minute_b").text(minutes);
+
+    timer_b++;
+  }, 1000);
+}
+
+function startTimer_w() {
+  let seconds, minutes;
+
+  interval_w = setInterval(function () {
+    seconds = parseInt(timer_w % 60, 10);
+    minutes = parseInt(timer_w / 60, 10);
+    seconds = seconds < 10 && seconds >= 0 ? "0" + seconds : seconds;
+    minutes = minutes < 10 && minutes >= 0 ? "0" + minutes : minutes;
+
+    $("#second_w").text(seconds);
+    $("#minute_w").text(minutes);
+
+    timer_w++;
+  }, 1000);
+}
+
 function resize_board() {
-  if (vmin(80 + 25 + 25 + 10) > vmax(100) || vw(100) > 700) {
+  $(".container").css(
+    "--piece-section-width",
+    "calc((100vmax - var(--piece-section-length)) / 2 - 2vmin)"
+  );
+  if (vmin(80 + 25 + 25 + 10) - vmax(100) > -32) {
+    $(".container").css("--piece-section-length", "45vmin");
+    $(".container").css("--piece-section-width", "15vmin");
+  } else if (vw(100) > 800) {
     $(".container").css("--piece-section-length", "60vmin");
   } else {
     $(".container").css("--piece-section-length", "80vmin");
@@ -39,6 +82,9 @@ function move_piece(destination_cell) {
   $(".selected").removeClass("selected");
   select = false;
   round = 1 - round;
+  round === 1 ? startTimer_b() : startTimer_w();
+  round === 1 ? clearInterval(interval_w) : clearInterval(interval_b);
+
   setTimeout(() => {
     let if_4_black_pieces_in_line =
       jQuery.inArray(1, if_N_pieces_in_line(4)) !== -1;
@@ -47,6 +93,8 @@ function move_piece(destination_cell) {
 
     // 若發現有四子連線
     if (if_N_pieces_in_line(4).length !== 0) {
+      clearInterval(interval_b);
+      clearInterval(interval_w);
       //若黑白雙方均有四子連線，拿起棋子時對方已勝利
       if (if_4_black_pieces_in_line && if_4_white_pieces_in_line) {
         round === 1
@@ -56,8 +104,84 @@ function move_piece(destination_cell) {
       }
       if_4_black_pieces_in_line && alert("黑方獲勝!");
       if_4_white_pieces_in_line && alert("白方獲勝!");
+
+      confirm("是否重置盤面?") && render_board();
     }
   }, 200);
+}
+
+function render_board() {
+  round = 1;
+  timer_b = 1;
+  timer_w = 1;
+
+  $(".container").empty();
+  $(".container").append(`
+    <div class="timer_section">
+      <span id="minute_b">00</span>:<span id="second_b">00</span>
+    </div>
+    <div class="piece-section">
+      <div class="piece-stack">
+        <div class="piece" data-used="0" data-color="1" data-size="1"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="2"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="3"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-used="0" data-color="1" data-size="1"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="2"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="3"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-used="0" data-color="1" data-size="1"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="2"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="3"></div>
+        <div class="piece" data-used="0" data-color="1" data-size="4"></div>
+      </div>
+    </div>
+    <div class="board">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>   
+    <div class="piece-section">
+      <div class="piece-stack">
+        <div class="piece" data-used="0" data-color="0" data-size="1"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="2"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="3"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-used="0" data-color="0" data-size="1"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="2"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="3"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-used="0" data-color="0" data-size="1"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="2"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="3"></div>
+        <div class="piece" data-used="0" data-color="0" data-size="4"></div>
+      </div>
+    </div>
+    <div class="timer_section">
+      <span id="minute_w">00</span>:<span id="second_w">00</span>
+    </div>
+  `);
 }
 
 function if_N_pieces_in_line(number) {
@@ -140,13 +264,14 @@ function if_N_pieces_in_line(number) {
   return which_color_has_N_pieces_in_line;
 }
 
+render_board();
 resize_board();
 
 $(window).on("resize", function () {
   resize_board();
 });
 
-$(".piece").on("click", function (event) {
+$(document).on("click", ".piece", function (event) {
   event.stopPropagation();
 
   // 若選擇已選取的棋子，則取消選取之
@@ -188,7 +313,7 @@ $(".piece").on("click", function (event) {
   }
 });
 
-$(".cell").on("click", function (event) {
+$(document).on("click", ".cell", function (event) {
   event.stopPropagation();
 
   // 如果目前沒有已選取的棋子，或該cell內已有棋子

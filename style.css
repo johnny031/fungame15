@@ -14,6 +14,7 @@ body {
   align-items: center;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background-color: rgb(234, 229, 229);
 }
@@ -24,12 +25,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: center; 
   gap: 2vmin;
-}
-
-.board-wrapper {
-  border-radius: 4rem;
 }
 
 .board {
@@ -102,6 +99,15 @@ body {
   height: 72%;
 }
 
+.timer_section {
+  width: var(--piece-section-length);
+  text-align: center;
+}
+
+.timer_section:first-of-type {
+  transform: rotate(180deg);
+}
+
 @media (orientation: landscape) {
   .container {
     flex-direction: row;
@@ -113,6 +119,19 @@ body {
     height: var(--piece-section-length);
     max-height: none;
     flex-direction: column;
+  }
+
+  .timer_section {
+    width: auto;
+    height: var(--piece-section-length);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: rotate(-90deg);
+  }
+
+  .timer_section:first-of-type {
+    transform: rotate(90deg);
   }
 
   .piece-stack {
