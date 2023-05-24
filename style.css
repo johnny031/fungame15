@@ -186,6 +186,18 @@ body {
     flex-direction: column-reverse;
   }
 
+  .timer-bar-wrapper {
+    height: 100%;
+    display: flex;
+    align-items: end;
+  }
+  
+  .timer-bar {
+    height: var(--bar-width);
+    width: 4vmin;
+    background: linear-gradient(to right, var(--color1), var(--color2));
+  }
+
   .timer-number {
     --rotate: -90deg;
   }
@@ -194,16 +206,6 @@ body {
     height: calc(var(--piece-section-length) / 4);
     width: calc(var(--piece-section-width) - 2vmin);
     max-width: calc(var(--piece-section-length) / 4);
-  }
-
-  .timer-bar-wrapper {
-    height: 100%;
-  }
-  
-  .timer-bar {
-    height: var(--bar-width);
-    width: 4vmin;
-    background: linear-gradient(to right, var(--color1), var(--color2));
   }
 }
 
