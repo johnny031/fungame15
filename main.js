@@ -1,7 +1,5 @@
 let select = false;
 let round = 1; // 1=black 0=white
-let interval_b;
-let interval_w;
 let interval_timer_bar_b;
 let interval_timer_bar_w;
 let timer_b = 4;
@@ -32,70 +30,61 @@ function vmax(percent) {
   return Math.max(vh(percent), vw(percent));
 }
 
-function startTimer_b() {
-  let seconds;
-
-  interval_b = setInterval(function () {
-    seconds = parseInt(timer_b % 60, 10);
-
-    $("#second_b").text(seconds);
-
-    if (--timer_b < 0) {
-      clearInterval(interval_b);
-      if (timer_on) {
-        change_round();
-      }
-    }
-  }, 1000);
-}
-
-function startTimer_w() {
-  let seconds;
-
-  interval_w = setInterval(function () {
-    seconds = parseInt(timer_w % 60, 10);
-
-    $("#second_w").text(seconds);
-
-    if (--timer_w < 0) {
-      clearInterval(interval_w);
-      if (timer_on) {
-        change_round();
-      }
-    }
-  }, 1000);
-}
-
 function startTimerBar_w() {
-  interval_timer_bar_w = setInterval(frame, 10);
-  let width = (timer_w + 1) * 100;
+  let seconds;
+  let fram_per_sec = 10;
+
+  interval_timer_bar_w = setInterval(frame, 1000 / fram_per_sec);
 
   function frame() {
-    if (width <= 0) {
+    seconds = parseInt(Math.ceil(timer_w + 1) % 60, 10);
+    $("#second_w").text(seconds);
+
+    if (timer_w + 1 <= 0) {
       clearInterval(interval_timer_bar_w);
+      if (timer_on) {
+        change_round();
+      }
     } else {
-      width--;
-      if (width < 300 && timer_on) {
+      timer_w -= 0.1;
+      timer_w = Math.round(timer_w * 10) / 10;
+      if (timer_w < 2 && timer_on) {
         $("#second_w").addClass("shake");
       }
-      $(".timer-bar.white").attr("style", `--bar-width: ${width / 40}%`);
+
+      $(".timer-bar.white").attr(
+        "style",
+        `--bar-width: ${(100 * (timer_w + 1)) / 40}%`
+      );
     }
   }
 }
 
 function startTimerBar_b() {
-  interval_timer_bar_b = setInterval(frame, 10);
-  let width = (timer_b + 1) * 100;
+  let seconds;
+  let fram_per_sec = 10;
+
+  interval_timer_bar_b = setInterval(frame, 1000 / fram_per_sec);
 
   function frame() {
-    if (width <= 0) {
+    seconds = parseInt(Math.ceil(timer_b + 1) % 60, 10);
+    $("#second_b").text(seconds);
+
+    if (timer_b + 1 <= 0) {
       clearInterval(interval_timer_bar_b);
+      if (timer_on) {
+        change_round();
+      }
     } else {
-      width--;
-      if (width < 300 && timer_on) {
+      timer_b -= 0.1;
+      timer_b = Math.round(timer_b * 10) / 10;
+      if (timer_b < 2 && timer_on) {
         $("#second_b").addClass("shake");
       }
-      $(".timer-bar.black").attr("style", `--bar-width: ${width / 40}%`);
+      $(".timer-bar.black").attr(
+        "style",
+        `--bar-width: ${(100 * (timer_b + 1)) / 40}%`
+      );
     }
   }
 }
@@ -120,9 +109,7 @@ function change_round() {
   $(".selected").removeClass("selected");
   round = 1 - round;
   round === 1 ? (timer_w += 10) : (timer_b += 10);
-  round === 1 ? startTimer_b() : startTimer_w();
   round === 1 ? startTimerBar_b() : startTimerBar_w();
-  round === 1 ? clearInterval(interval_w) : clearInterval(interval_b);
   round === 1
     ? clearInterval(interval_timer_bar_w)
     : clearInterval(interval_timer_bar_b);
@@ -132,16 +119,16 @@ function change_round() {
 
   $("#second_w, #second_b").removeClass("shake");
 
-  $("#second_b").text(timer_b + 1);
-  $("#second_w").text(timer_w + 1);
+  $("#second_b").text(Math.round(timer_b) + 1);
+  $("#second_w").text(Math.round(timer_w) + 1);
 
   $(".timer-bar.black").attr(
     "style",
-    `--bar-width: ${(100 * (timer_b + 1)) / 40}%`
+    `--bar-width: ${(100 * (Math.round(timer_b) + 1)) / 40}%`
   );
   $(".timer-bar.white").attr(
     "style",
-    `--bar-width: ${(100 * (timer_w + 1)) / 40}%`
+    `--bar-width: ${(100 * (Math.round(timer_w) + 1)) / 40}%`
   );
 }
 
@@ -158,8 +145,6 @@ function move_piece(destination_cell) {
 
     // 若發現有四子連線
     if (if_N_pieces_in_line(4).length !== 0) {
-      clearInterval(interval_b);
-      clearInterval(interval_w);
       clearInterval(interval_timer_bar_b);
       clearInterval(interval_timer_bar_w);
       //若黑白雙方均有四子連線，拿起棋子時對方已勝利
