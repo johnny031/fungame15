@@ -4,6 +4,7 @@ let interval_timer_bar_b;
 let interval_timer_bar_w;
 let timer_b = 4;
 let timer_w = 4;
+let fram_per_sec = 10;
 let timer_on = false;
 
 function vh(percent) {
@@ -32,8 +33,6 @@ function vmax(percent) {
 
 function startTimerBar_w() {
   let seconds;
-  let fram_per_sec = 10;
-
   interval_timer_bar_w = setInterval(frame, 1000 / fram_per_sec);
 
   function frame() {
@@ -46,7 +45,7 @@ function startTimerBar_w() {
         change_round();
       }
     } else {
-      timer_w -= 0.1;
+      timer_w -= 1 / fram_per_sec;
       timer_w = Math.round(timer_w * 10) / 10;
       if (timer_w < 2 && timer_on) {
         $("#second_w").addClass("shake");
@@ -62,8 +61,6 @@ function startTimerBar_w() {
 
 function startTimerBar_b() {
   let seconds;
-  let fram_per_sec = 10;
-
   interval_timer_bar_b = setInterval(frame, 1000 / fram_per_sec);
 
   function frame() {
@@ -76,7 +73,7 @@ function startTimerBar_b() {
         change_round();
       }
     } else {
-      timer_b -= 0.1;
+      timer_b -= 1 / fram_per_sec;
       timer_b = Math.round(timer_b * 10) / 10;
       if (timer_b < 2 && timer_on) {
         $("#second_b").addClass("shake");
