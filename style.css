@@ -157,7 +157,7 @@ body {
   left:0;
   width: 100%;
   height: 100%;
-  background-color: hsla(0, 0%, 50%, 0.8);
+  background-color: hsl(0, 0%, 73%);
   font-size: 5vw;
   font-weight: bold;
   color: hsl(0, 0%, 15%);
