@@ -87,14 +87,6 @@ function startTimerBar_b() {
 }
 
 function resize_board() {
-  let height = $(window).height();
-  let width = $(window).width();
-  if (width > height) {
-    $(".overlay").attr("style", "display: flex");
-  } else {
-    $(".overlay").attr("style", "display: none");
-  }
-
   $(".container").css(
     "--piece-section-width",
     "calc((100vmax - var(--piece-section-length)) / 2 - 2vmin)"
