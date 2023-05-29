@@ -87,6 +87,14 @@ function startTimerBar_b() {
 }
 
 function resize_board() {
+  let height = $(window).height();
+  let width = $(window).width();
+  if (width > height) {
+    $(".overlay").attr("style", "display: flex");
+  } else {
+    $(".overlay").attr("style", "display: none");
+  }
+
   $(".container").css(
     "--piece-section-width",
     "calc((100vmax - var(--piece-section-length)) / 2 - 2vmin)"
@@ -254,7 +262,6 @@ function if_N_pieces_in_line(number) {
       $(this).children(".piece").last().attr("data-color")
     );
   });
-
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       if (pieces_location[i][j] === "0") {

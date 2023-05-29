@@ -151,6 +151,23 @@ body {
   animation-iteration-count: infinite;
 }
 
+.overlay {
+  position: absolute;
+  top: 0;
+  left:0;
+  width: 100%;
+  height: 100%;
+  background-color: hsla(0, 0%, 50%, 0.8);
+  font-size: 5vw;
+  font-weight: bold;
+  color: hsl(0, 0%, 15%);
+  text-shadow: 1px 1px 1px hsl(0, 0%, 71%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
+}
+
 @keyframes shake {
   10%, 90% { --shake: -0.5px; }
   20%, 80% { --shake: +1px; }
@@ -193,8 +210,8 @@ body {
   }
   
   .timer-bar {
-    height: var(--bar-width);
     width: 4vmin;
+    height: var(--bar-width);
     background: linear-gradient(to right, var(--color1), var(--color2));
   }
 
