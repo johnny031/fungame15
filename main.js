@@ -162,6 +162,8 @@ function move_piece(destination_cell) {
 
 function render_board() {
   round = 1;
+  timer_b = 4;
+  timer_w = 4;
 
   $(".container").empty();
   $(".container").append(`
