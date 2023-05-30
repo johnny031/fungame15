@@ -104,6 +104,7 @@ function resize_board() {
 function change_round() {
   select = false;
   $(".selected").removeClass("selected");
+  $(".timer-bar").addClass("transition-smooth");
   round = 1 - round;
   round === 1 ? (timer_w += 10) : (timer_b += 10);
   round === 1 ? startTimerBar_b() : startTimerBar_w();
@@ -127,6 +128,10 @@ function change_round() {
     "style",
     `--bar-width: ${(100 * (Math.round(timer_w) + 1)) / 40}%`
   );
+
+  setTimeout(() => {
+    $(".timer-bar").removeClass("transition-smooth");
+  }, 500);
 }
 
 function move_piece(destination_cell) {
@@ -240,6 +245,10 @@ function render_board() {
   `);
 }
 
+$("body").on("click", function () {
+  if_N_pieces_in_line(3);
+});
+
 function if_N_pieces_in_line(number) {
   let pieces_location = [];
   let count_white = 0;
@@ -254,8 +263,9 @@ function if_N_pieces_in_line(number) {
       $(this).children(".piece").last().attr("data-color")
     );
   });
+
   for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
+    loop1: for (let j = 0; j < 4; j++) {
       if (pieces_location[i][j] === "0") {
         count_white++;
       }
@@ -263,6 +273,21 @@ function if_N_pieces_in_line(number) {
         count_black++;
       }
       if (j === 3) {
+        if (count_black * count_white === 3) {
+          let color = 0;
+          if (count_black === 1) color = 1;
+
+          for (let k = 1; k <= 4; k++) {
+            let size = $(`.cell:nth-of-type(${i * 4 + k})`)
+              .children(`[data-color=${color}]`)
+              .last()
+              .attr("data-size");
+
+            if (size == 4) {
+              break loop1;
+            }
+          }
+        }
         if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
         if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
       }
@@ -272,7 +297,7 @@ function if_N_pieces_in_line(number) {
   }
 
   for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
+    loop1: for (let j = 0; j < 4; j++) {
       if (pieces_location[j][i] === "0") {
         count_white++;
       }
@@ -280,6 +305,22 @@ function if_N_pieces_in_line(number) {
         count_black++;
       }
       if (j === 3) {
+        if (count_black * count_white === 3) {
+          let color = 0;
+          if (count_black === 1) color = 1;
+
+          for (let k = 0; k <= 3; k++) {
+            let size = $(`.cell:nth-of-type(${k * 4 + i + 1})`)
+              .children(`[data-color=${color}]`)
+              .last()
+              .attr("data-size");
+
+            if (size == 4) {
+              break loop1;
+            }
+          }
+        }
+
         if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
         if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
       }
@@ -288,7 +329,7 @@ function if_N_pieces_in_line(number) {
     count_black = 0;
   }
 
-  for (let i = 0; i < 4; i++) {
+  loop1: for (let i = 0; i < 4; i++) {
     if (pieces_location[i][i] === "0") {
       count_white++;
     }
@@ -296,6 +337,22 @@ function if_N_pieces_in_line(number) {
       count_black++;
     }
     if (i === 3) {
+      if (count_black * count_white === 3) {
+        let color = 0;
+        if (count_black === 1) color = 1;
+
+        for (let k = 1; k <= 16; k += 5) {
+          let size = $(`.cell:nth-of-type(${k})`) // 1,6,11,16
+            .children(`[data-color=${color}]`)
+            .last()
+            .attr("data-size");
+
+          if (size == 4) {
+            break loop1;
+          }
+        }
+      }
+
       if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
       if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
     }
@@ -303,7 +360,7 @@ function if_N_pieces_in_line(number) {
   count_white = 0;
   count_black = 0;
 
-  for (let i = 0, j = 3; i < 4, j >= 0; i++, j--) {
+  loop1: for (let i = 0, j = 3; i < 4, j >= 0; i++, j--) {
     if (pieces_location[i][j] === "0") {
       count_white++;
     }
@@ -311,6 +368,22 @@ function if_N_pieces_in_line(number) {
       count_black++;
     }
     if (i === 3) {
+      if (count_black * count_white === 3) {
+        let color = 0;
+        if (count_black === 1) color = 1;
+
+        for (let k = 4; k <= 13; k += 3) {
+          let size = $(`.cell:nth-of-type(${k})`) // 4,7,10,13
+            .children(`[data-color=${color}]`)
+            .last()
+            .attr("data-size");
+
+          if (size == 4) {
+            break loop1;
+          }
+        }
+      }
+
       if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
       if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
     }
