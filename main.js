@@ -176,6 +176,7 @@ function render_board() {
   round = 1;
   timer_b = 4;
   timer_w = 4;
+  move_record = [];
 
   $(".container").empty();
   $(".container").append(`
