@@ -6,6 +6,7 @@ let timer_b = 4;
 let timer_w = 4;
 let fram_per_sec = 10;
 let timer_on = false;
+let move_record = [];
 
 function vh(percent) {
   var h = Math.max(
@@ -101,12 +102,14 @@ function resize_board() {
   }
 }
 
-function change_round() {
+function change_round(retract = false) {
   select = false;
   $(".selected").removeClass("selected");
   $(".timer-bar").addClass("transition-smooth");
   round = 1 - round;
-  round === 1 ? (timer_w += 10) : (timer_b += 10);
+  if (!retract) {
+    round === 1 ? (timer_w += 10) : (timer_b += 10);
+  }
   round === 1 ? startTimerBar_b() : startTimerBar_w();
   round === 1
     ? clearInterval(interval_timer_bar_w)
@@ -135,6 +138,10 @@ function change_round() {
 }
 
 function move_piece(destination_cell) {
+  let origin_position = $(".selected").parent().attr("data-position");
+  let destination_position = destination_cell.attr("data-position");
+  move_record.push([origin_position, destination_position]);
+
   $(".selected").detach().appendTo(destination_cell);
   $(".selected").attr("data-used", "1");
   change_round();
@@ -179,19 +186,19 @@ function render_board() {
       <span class="timer-number" id="second_b">5</span>
     </div>
     <div class="piece-section">
-      <div class="piece-stack">
+      <div class="piece-stack" data-position="40">
         <div class="piece" data-used="0" data-color="1" data-size="1"></div>
         <div class="piece" data-used="0" data-color="1" data-size="2"></div>
         <div class="piece" data-used="0" data-color="1" data-size="3"></div>
         <div class="piece" data-used="0" data-color="1" data-size="4"></div>
       </div>
-      <div class="piece-stack">
+      <div class="piece-stack" data-position="41">
         <div class="piece" data-used="0" data-color="1" data-size="1"></div>
         <div class="piece" data-used="0" data-color="1" data-size="2"></div>
         <div class="piece" data-used="0" data-color="1" data-size="3"></div>
         <div class="piece" data-used="0" data-color="1" data-size="4"></div>
       </div>
-      <div class="piece-stack">
+      <div class="piece-stack" data-position="42">
         <div class="piece" data-used="0" data-color="1" data-size="1"></div>
         <div class="piece" data-used="0" data-color="1" data-size="2"></div>
         <div class="piece" data-used="0" data-color="1" data-size="3"></div>
@@ -199,37 +206,37 @@ function render_board() {
       </div>
     </div>
     <div class="board">
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
+      <div class="cell" data-position="00"></div>
+      <div class="cell" data-position="01"></div>
+      <div class="cell" data-position="02"></div>
+      <div class="cell" data-position="03"></div>
+      <div class="cell" data-position="10"></div>
+      <div class="cell" data-position="11"></div>
+      <div class="cell" data-position="12"></div>
+      <div class="cell" data-position="13"></div>
+      <div class="cell" data-position="20"></div>
+      <div class="cell" data-position="21"></div>
+      <div class="cell" data-position="22"></div>
+      <div class="cell" data-position="23"></div>
+      <div class="cell" data-position="30"></div>
+      <div class="cell" data-position="31"></div>
+      <div class="cell" data-position="32"></div>
+      <div class="cell" data-position="33"></div>
     </div>   
     <div class="piece-section">
-      <div class="piece-stack">
+      <div class="piece-stack" data-position="50">
         <div class="piece" data-used="0" data-color="0" data-size="1"></div>
         <div class="piece" data-used="0" data-color="0" data-size="2"></div>
         <div class="piece" data-used="0" data-color="0" data-size="3"></div>
         <div class="piece" data-used="0" data-color="0" data-size="4"></div>
       </div>
-      <div class="piece-stack">
+      <div class="piece-stack" data-position="51">
         <div class="piece" data-used="0" data-color="0" data-size="1"></div>
         <div class="piece" data-used="0" data-color="0" data-size="2"></div>
         <div class="piece" data-used="0" data-color="0" data-size="3"></div>
         <div class="piece" data-used="0" data-color="0" data-size="4"></div>
       </div>
-      <div class="piece-stack">
+      <div class="piece-stack" data-position="52">
         <div class="piece" data-used="0" data-color="0" data-size="1"></div>
         <div class="piece" data-used="0" data-color="0" data-size="2"></div>
         <div class="piece" data-used="0" data-color="0" data-size="3"></div>
@@ -244,10 +251,6 @@ function render_board() {
     </div>
   `);
 }
-
-$("body").on("click", function () {
-  if_N_pieces_in_line(3);
-});
 
 function if_N_pieces_in_line(number) {
   let pieces_location = [];
@@ -455,4 +458,25 @@ $(document).on("dblclick", ".timer_section", function () {
   confirm("請問要將設定改為「限制時間」嗎？\n若點選取消，則改為「不限制時間」")
     ? (timer_on = true)
     : (timer_on = false);
+});
+
+$(document).on("dblclick", ".piece-section", function () {
+  if (move_record.length === 0) return false;
+  if (!confirm("確定要悔一手嗎？")) return false;
+
+  let origin = $(`[data-position=${move_record[move_record.length - 1][0]}]`);
+  let destination = $(
+    `[data-position=${move_record[move_record.length - 1][1]}]`
+  )
+    .children(".piece")
+    .last();
+
+  destination.detach().appendTo(origin);
+
+  move_record.pop();
+
+  if (origin.attr("class") === "piece-stack") {
+    origin.children(".piece").last().attr("data-used", "0");
+  }
+  change_round(true);
 });
