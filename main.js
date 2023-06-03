@@ -7,6 +7,54 @@ let timer_w = 4;
 let fram_per_sec = 10;
 let timer_on = false;
 let move_record = [];
+let unused_pieces_record = [
+  [
+    [
+      [1, 1],
+      [1, 2],
+      [1, 3],
+      [1, 4],
+    ],
+    [
+      [1, 1],
+      [1, 2],
+      [1, 3],
+      [1, 4],
+    ],
+    [
+      [1, 1],
+      [1, 2],
+      [1, 3],
+      [1, 4],
+    ],
+  ],
+  [
+    [
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
+    ],
+    [
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
+    ],
+    [
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
+    ],
+  ],
+];
+let pieces_location_record = [
+  [[], [], [], []],
+  [[], [], [], []],
+  [[], [], [], []],
+  [[], [], [], []],
+];
 
 function vh(percent) {
   var h = Math.max(
@@ -140,6 +188,24 @@ function change_round(retract = false) {
 function move_piece(destination_cell) {
   let origin_position = $(".selected").parent().attr("data-position");
   let destination_position = destination_cell.attr("data-position");
+
+  // update board record
+  let origin_x = parseInt(origin_position.slice(0, 1));
+  let origin_y = parseInt(origin_position.slice(1, 2));
+
+  let dest_x = parseInt(destination_position.slice(0, 1));
+  let dest_y = parseInt(destination_position.slice(1, 2));
+  let the_moving_piece;
+
+  if (origin_x > 3) {
+    the_moving_piece = unused_pieces_record[origin_x - 4][origin_y].pop();
+  } else {
+    the_moving_piece = pieces_location_record[origin_x][origin_y].pop();
+  }
+
+  pieces_location_record[dest_x][dest_y].push(the_moving_piece);
+
+  // update move record
   move_record.push([origin_position, destination_position]);
 
   $(".selected").detach().appendTo(destination_cell);
@@ -465,6 +531,23 @@ $(document).on("dblclick", ".piece-section", function () {
   if (move_record.length === 0) return false;
   if (!confirm("確定要悔一手嗎？")) return false;
 
+  // update board record
+  let origin_x = parseInt(move_record[move_record.length - 1][0].slice(0, 1));
+  let origin_y = parseInt(move_record[move_record.length - 1][0].slice(1, 2));
+
+  let dest_x = parseInt(move_record[move_record.length - 1][1].slice(0, 1));
+  let dest_y = parseInt(move_record[move_record.length - 1][1].slice(1, 2));
+  let the_moving_piece;
+
+  the_moving_piece = pieces_location_record[dest_x][dest_y].pop();
+
+  if (origin_x > 3) {
+    unused_pieces_record[origin_x - 4][origin_y].push(the_moving_piece);
+  } else {
+    pieces_location_record[origin_x][origin_y].push(the_moving_piece);
+  }
+
+  // move piece
   let origin = $(`[data-position=${move_record[move_record.length - 1][0]}]`);
   let destination = $(
     `[data-position=${move_record[move_record.length - 1][1]}]`
