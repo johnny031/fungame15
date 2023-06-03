@@ -6,6 +6,7 @@ let timer_b = 4;
 let timer_w = 4;
 let fram_per_sec = 10;
 let timer_on = false;
+let manVSMachine = -1; // -1: 雙人對戰, 0: 玩家執白子, 1: 玩家執黑子
 let move_record = [];
 let unused_pieces_record = [
   [
@@ -235,14 +236,68 @@ function move_piece(destination_cell) {
 
       confirm("是否重置盤面?") && render_board();
     }
+
+    if (manVSMachine === round) {
+      machine_move_piece();
+    }
   }, 200);
 }
 
 function render_board() {
+  clearInterval(interval_timer_bar_b);
+  clearInterval(interval_timer_bar_w);
   round = 1;
   timer_b = 4;
   timer_w = 4;
   move_record = [];
+  unused_pieces_record = [
+    [
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 4],
+      ],
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 4],
+      ],
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 4],
+      ],
+    ],
+    [
+      [
+        [0, 1],
+        [0, 2],
+        [0, 3],
+        [0, 4],
+      ],
+      [
+        [0, 1],
+        [0, 2],
+        [0, 3],
+        [0, 4],
+      ],
+      [
+        [0, 1],
+        [0, 2],
+        [0, 3],
+        [0, 4],
+      ],
+    ],
+  ];
+  pieces_location_record = [
+    [[], [], [], []],
+    [[], [], [], []],
+    [[], [], [], []],
+    [[], [], [], []],
+  ];
 
   $(".container").empty();
   $(".container").append(`
@@ -563,4 +618,32 @@ $(document).on("dblclick", ".piece-section", function () {
     origin.children(".piece").last().attr("data-used", "0");
   }
   change_round(true);
+});
+
+$(document).on("dblclick", ".board", function () {
+  if (manVSMachine === -1) {
+    if (confirm("確定切換為人機對戰嗎？")) {
+      render_board();
+      if (confirm("您要執黑子嗎？\n若點選取消，則執白子")) {
+        manVSMachine = 0;
+        $("body").attr("style", "transform: rotate(180deg)");
+        $("[data-color='0']").attr("style", "pointer-events: none");
+      } else {
+        manVSMachine = 1;
+        $("body").attr("style", "transform: none");
+        $("[data-color='1']").attr("style", "pointer-events: none");
+        machine_move_piece();
+      }
+    }
+  } else {
+    if (confirm("確定切換為雙人對戰嗎？")) {
+      render_board();
+      manVSMachine = -1;
+      $("body").attr("style", "transform: none");
+      $("[data-color='1'],[data-color='0']").attr(
+        "style",
+        "pointer-events: auto"
+      );
+    }
+  }
 });
