@@ -13,7 +13,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100vw;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -21,6 +20,7 @@ body {
 }
 
 .container {
+  --board-rotate: 0deg;
   --piece-section-length: 80vmin;
   --piece-section-width: calc((100vmax - var(--piece-section-length)) / 2 - 2vmin);
   display: flex;
@@ -28,6 +28,7 @@ body {
   justify-content: center;
   align-items: center; 
   gap: 2vmin;
+  transform: rotate(calc(0deg - var(--board-rotate)));
 }
 
 .board {
@@ -173,48 +174,20 @@ body {
 
 @media (orientation: landscape) {
   .container {
-    flex-direction: row;
-  }
-  
-  .piece-section {
-    width: var(--piece-section-width);
-    max-width: 25vmin;
-    height: var(--piece-section-length);
-    max-height: none;
-    flex-direction: column;
-  }
-
-  .timer_section {
-    width: auto;
-    height: var(--piece-section-length);
-    flex-direction: column-reverse;
-  }
-
-  .timer-bar-wrapper {
-    height: 100%;
-    display: flex;
-    align-items: flex-end;
-  }
-  
-  .timer-bar {
-    width: 4vmin;
-    height: var(--bar-width);
-    background: linear-gradient(to right, var(--color1), var(--color2));
-  }
-
-  .timer-number {
-    --rotate: -90deg;
-  }
-
-  .piece-stack {
-    height: calc(var(--piece-section-length) / 4);
-    width: calc(var(--piece-section-width) - 2vmin);
-    max-width: calc(var(--piece-section-length) / 4);
+    transform: rotate(calc(-90deg - var(--board-rotate)));
   }
 }
 
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 380px) {
   .container {
-    --piece-section-length: 60vmin;
+    --piece-section-length: 70vmin;
+    --piece-section-width: 22vmin;
+  }
+}
+
+@media screen and (min-width: 450px) {
+  .container {
+    --piece-section-length: 45vmin;
+    --piece-section-width: 14vmin;
   }
 }

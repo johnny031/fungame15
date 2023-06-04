@@ -6,47 +6,47 @@ let timer_b = 4;
 let timer_w = 4;
 let fram_per_sec = 10;
 let timer_on = false;
-let manVSMachine = -1; // -1: 雙人對戰, 0: 玩家執白子, 1: 玩家執黑子
+let manVSMachine = -1; // -1: 雙人對戰, 0: 玩家執黑子, 1: 玩家執白子
 let move_record = [];
 let unused_pieces_record = [
   [
     [
-      [1, 1],
-      [1, 2],
-      [1, 3],
-      [1, 4],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
     ],
     [
-      [1, 1],
-      [1, 2],
-      [1, 3],
-      [1, 4],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
     ],
     [
-      [1, 1],
-      [1, 2],
-      [1, 3],
-      [1, 4],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
     ],
   ],
   [
     [
-      [0, 1],
-      [0, 2],
-      [0, 3],
-      [0, 4],
+      [1, 1],
+      [1, 2],
+      [1, 3],
+      [1, 4],
     ],
     [
-      [0, 1],
-      [0, 2],
-      [0, 3],
-      [0, 4],
+      [1, 1],
+      [1, 2],
+      [1, 3],
+      [1, 4],
     ],
     [
-      [0, 1],
-      [0, 2],
-      [0, 3],
-      [0, 4],
+      [1, 1],
+      [1, 2],
+      [1, 3],
+      [1, 4],
     ],
   ],
 ];
@@ -56,30 +56,6 @@ let pieces_location_record = [
   [[], [], [], []],
   [[], [], [], []],
 ];
-
-function vh(percent) {
-  var h = Math.max(
-    document.documentElement.clientHeight,
-    window.innerHeight || 0
-  );
-  return (percent * h) / 100;
-}
-
-function vw(percent) {
-  var w = Math.max(
-    document.documentElement.clientWidth,
-    window.innerWidth || 0
-  );
-  return (percent * w) / 100;
-}
-
-function vmin(percent) {
-  return Math.min(vh(percent), vw(percent));
-}
-
-function vmax(percent) {
-  return Math.max(vh(percent), vw(percent));
-}
 
 function startTimerBar_w() {
   let seconds;
@@ -136,21 +112,6 @@ function startTimerBar_b() {
   }
 }
 
-function resize_board() {
-  $(".container").css(
-    "--piece-section-width",
-    "calc((100vmax - var(--piece-section-length)) / 2 - 2vmin)"
-  );
-  if (vmin(80 + 25 + 25 + 10) - vmax(100) > -32) {
-    $(".container").css("--piece-section-length", "45vmin");
-    $(".container").css("--piece-section-width", "15vmin");
-  } else if (vw(100) > 800) {
-    $(".container").css("--piece-section-length", "60vmin");
-  } else {
-    $(".container").css("--piece-section-length", "80vmin");
-  }
-}
-
 function change_round(retract = false) {
   select = false;
   $(".selected").removeClass("selected");
@@ -186,33 +147,37 @@ function change_round(retract = false) {
   }, 500);
 }
 
-function move_piece(destination_cell) {
-  let origin_position = $(".selected").parent().attr("data-position");
-  let destination_position = destination_cell.attr("data-position");
-
-  // update board record
+function update_board_record(
+  origin_position,
+  destination_position,
+  retract = false
+) {
   let origin_x = parseInt(origin_position.slice(0, 1));
   let origin_y = parseInt(origin_position.slice(1, 2));
 
   let dest_x = parseInt(destination_position.slice(0, 1));
   let dest_y = parseInt(destination_position.slice(1, 2));
   let the_moving_piece;
+  if (retract) {
+    // 悔一手
+    the_moving_piece = pieces_location_record[dest_x][dest_y].pop();
 
-  if (origin_x > 3) {
-    the_moving_piece = unused_pieces_record[origin_x - 4][origin_y].pop();
+    if (origin_x > 3) {
+      unused_pieces_record[origin_x - 4][origin_y].push(the_moving_piece);
+    } else {
+      pieces_location_record[origin_x][origin_y].push(the_moving_piece);
+    }
   } else {
-    the_moving_piece = pieces_location_record[origin_x][origin_y].pop();
+    if (origin_x > 3) {
+      the_moving_piece = unused_pieces_record[origin_x - 4][origin_y].pop();
+    } else {
+      the_moving_piece = pieces_location_record[origin_x][origin_y].pop();
+    }
+    pieces_location_record[dest_x][dest_y].push(the_moving_piece);
   }
+}
 
-  pieces_location_record[dest_x][dest_y].push(the_moving_piece);
-
-  // update move record
-  move_record.push([origin_position, destination_position]);
-
-  $(".selected").detach().appendTo(destination_cell);
-  $(".selected").attr("data-used", "1");
-  change_round();
-
+function check_if_win() {
   setTimeout(() => {
     let if_4_black_pieces_in_line =
       jQuery.inArray(1, if_N_pieces_in_line(4)) !== -1;
@@ -243,6 +208,21 @@ function move_piece(destination_cell) {
   }, 200);
 }
 
+function move_piece(destination_cell) {
+  let origin_position = $(".selected").parent().attr("data-position");
+  let destination_position = destination_cell.attr("data-position");
+
+  update_board_record(origin_position, destination_position);
+
+  // update move record
+  move_record.push([origin_position, destination_position]);
+
+  $(".selected").detach().appendTo(destination_cell);
+  $(".selected").attr("data-used", "1");
+  change_round();
+  check_if_win();
+}
+
 function render_board() {
   clearInterval(interval_timer_bar_b);
   clearInterval(interval_timer_bar_w);
@@ -253,42 +233,42 @@ function render_board() {
   unused_pieces_record = [
     [
       [
-        [1, 1],
-        [1, 2],
-        [1, 3],
-        [1, 4],
+        [0, 1],
+        [0, 2],
+        [0, 3],
+        [0, 4],
       ],
       [
-        [1, 1],
-        [1, 2],
-        [1, 3],
-        [1, 4],
+        [0, 1],
+        [0, 2],
+        [0, 3],
+        [0, 4],
       ],
       [
-        [1, 1],
-        [1, 2],
-        [1, 3],
-        [1, 4],
+        [0, 1],
+        [0, 2],
+        [0, 3],
+        [0, 4],
       ],
     ],
     [
       [
-        [0, 1],
-        [0, 2],
-        [0, 3],
-        [0, 4],
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 4],
       ],
       [
-        [0, 1],
-        [0, 2],
-        [0, 3],
-        [0, 4],
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 4],
       ],
       [
-        [0, 1],
-        [0, 2],
-        [0, 3],
-        [0, 4],
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 4],
       ],
     ],
   ];
@@ -308,19 +288,19 @@ function render_board() {
       <span class="timer-number" id="second_b">5</span>
     </div>
     <div class="piece-section">
-      <div class="piece-stack" data-position="40">
+      <div class="piece-stack" data-position="50">
         <div class="piece" data-used="0" data-color="1" data-size="1"></div>
         <div class="piece" data-used="0" data-color="1" data-size="2"></div>
         <div class="piece" data-used="0" data-color="1" data-size="3"></div>
         <div class="piece" data-used="0" data-color="1" data-size="4"></div>
       </div>
-      <div class="piece-stack" data-position="41">
+      <div class="piece-stack" data-position="51">
         <div class="piece" data-used="0" data-color="1" data-size="1"></div>
         <div class="piece" data-used="0" data-color="1" data-size="2"></div>
         <div class="piece" data-used="0" data-color="1" data-size="3"></div>
         <div class="piece" data-used="0" data-color="1" data-size="4"></div>
       </div>
-      <div class="piece-stack" data-position="42">
+      <div class="piece-stack" data-position="52">
         <div class="piece" data-used="0" data-color="1" data-size="1"></div>
         <div class="piece" data-used="0" data-color="1" data-size="2"></div>
         <div class="piece" data-used="0" data-color="1" data-size="3"></div>
@@ -346,19 +326,19 @@ function render_board() {
       <div class="cell" data-position="33"></div>
     </div>   
     <div class="piece-section">
-      <div class="piece-stack" data-position="50">
+      <div class="piece-stack" data-position="40">
         <div class="piece" data-used="0" data-color="0" data-size="1"></div>
         <div class="piece" data-used="0" data-color="0" data-size="2"></div>
         <div class="piece" data-used="0" data-color="0" data-size="3"></div>
         <div class="piece" data-used="0" data-color="0" data-size="4"></div>
       </div>
-      <div class="piece-stack" data-position="51">
+      <div class="piece-stack" data-position="41">
         <div class="piece" data-used="0" data-color="0" data-size="1"></div>
         <div class="piece" data-used="0" data-color="0" data-size="2"></div>
         <div class="piece" data-used="0" data-color="0" data-size="3"></div>
         <div class="piece" data-used="0" data-color="0" data-size="4"></div>
       </div>
-      <div class="piece-stack" data-position="52">
+      <div class="piece-stack" data-position="42">
         <div class="piece" data-used="0" data-color="0" data-size="1"></div>
         <div class="piece" data-used="0" data-color="0" data-size="2"></div>
         <div class="piece" data-used="0" data-color="0" data-size="3"></div>
@@ -518,11 +498,6 @@ function if_N_pieces_in_line(number) {
 }
 
 render_board();
-resize_board();
-
-$(window).on("resize", function () {
-  resize_board();
-});
 
 $(document).on("click", ".piece", function (event) {
   event.stopPropagation();
@@ -582,42 +557,43 @@ $(document).on("dblclick", ".timer_section", function () {
     : (timer_on = false);
 });
 
+function retract_move(number) {
+  for (let i = 0; i < number; i++) {
+    update_board_record(
+      move_record[move_record.length - 1][0],
+      move_record[move_record.length - 1][1],
+      true
+    );
+
+    // move piece
+    let origin = $(`[data-position=${move_record[move_record.length - 1][0]}]`);
+    let destination = $(
+      `[data-position=${move_record[move_record.length - 1][1]}]`
+    )
+      .children(".piece")
+      .last();
+
+    destination.detach().appendTo(origin);
+
+    move_record.pop();
+
+    if (origin.attr("class") === "piece-stack") {
+      origin.children(".piece").last().attr("data-used", "0");
+    }
+    change_round(true);
+  }
+}
+
 $(document).on("dblclick", ".piece-section", function () {
   if (move_record.length === 0) return false;
   if (!confirm("確定要悔一手嗎？")) return false;
 
-  // update board record
-  let origin_x = parseInt(move_record[move_record.length - 1][0].slice(0, 1));
-  let origin_y = parseInt(move_record[move_record.length - 1][0].slice(1, 2));
-
-  let dest_x = parseInt(move_record[move_record.length - 1][1].slice(0, 1));
-  let dest_y = parseInt(move_record[move_record.length - 1][1].slice(1, 2));
-  let the_moving_piece;
-
-  the_moving_piece = pieces_location_record[dest_x][dest_y].pop();
-
-  if (origin_x > 3) {
-    unused_pieces_record[origin_x - 4][origin_y].push(the_moving_piece);
-  } else {
-    pieces_location_record[origin_x][origin_y].push(the_moving_piece);
+  if (manVSMachine > -1 && move_record.length > 1) {
+    retract_move(2);
+    return false;
   }
 
-  // move piece
-  let origin = $(`[data-position=${move_record[move_record.length - 1][0]}]`);
-  let destination = $(
-    `[data-position=${move_record[move_record.length - 1][1]}]`
-  )
-    .children(".piece")
-    .last();
-
-  destination.detach().appendTo(origin);
-
-  move_record.pop();
-
-  if (origin.attr("class") === "piece-stack") {
-    origin.children(".piece").last().attr("data-used", "0");
-  }
-  change_round(true);
+  if (manVSMachine === -1) retract_move(1);
 });
 
 $(document).on("dblclick", ".board", function () {
@@ -626,12 +602,10 @@ $(document).on("dblclick", ".board", function () {
       render_board();
       if (confirm("您要執黑子嗎？\n若點選取消，則執白子")) {
         manVSMachine = 0;
-        $("body").attr("style", "transform: rotate(180deg)");
-        $("[data-color='0']").attr("style", "pointer-events: none");
+        $(".container").attr("style", "--board-rotate: 180deg");
       } else {
         manVSMachine = 1;
-        $("body").attr("style", "transform: none");
-        $("[data-color='1']").attr("style", "pointer-events: none");
+        $(".container").attr("style", "--board-rotate: 0deg");
         machine_move_piece();
       }
     }
@@ -639,11 +613,7 @@ $(document).on("dblclick", ".board", function () {
     if (confirm("確定切換為雙人對戰嗎？")) {
       render_board();
       manVSMachine = -1;
-      $("body").attr("style", "transform: none");
-      $("[data-color='1'],[data-color='0']").attr(
-        "style",
-        "pointer-events: auto"
-      );
+      $(".container").attr("style", "--board-rotate: 0deg");
     }
   }
 });
