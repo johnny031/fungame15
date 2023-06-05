@@ -1,6 +1,6 @@
 let line_record = [
-  [0, false], // [在此可能連線中，machine方的棋子個數, 其中是否有size=4的]
-  [0, false], // [在此可能連線中，player方的棋子個數, 其中是否有size=4的]
+  [], // [在此可能連線中，machine方所有棋子的size]
+  [], // [在此可能連線中，player方所有棋子的size]
 ];
 
 function machine_move_piece() {
@@ -20,13 +20,9 @@ function machine_move_piece() {
     update_board_record(best_move[0], best_move[1]);
     move_record.push([best_move[0], best_move[1]]);
     change_round();
+    check_if_win();
   }, 400);
 }
-
-$("body").on("dblclick", function () {
-  // console.log(test_machine_unused_pieces);
-  // console.log(pieces_location_record);
-});
 
 function calc_best_move() {
   let all_possible_moves = [];
@@ -94,17 +90,17 @@ function calc_best_move() {
     }
   }
 
-  let duplicate_record = JSON.parse(JSON.stringify(pieces_location_record));
   let highest_score = [0, 0]; // [<當前最高積分>, <i>]
 
-  for (let i = 0; i < all_possible_moves.length; i++) {
-    // 逐一檢查每一個可能的移動
-    if (i !== 0) continue;
-    let origin_x = parseInt(all_possible_moves[i][0].slice(0, 1));
-    let origin_y = parseInt(all_possible_moves[i][0].slice(1, 2));
-    let dest_x = parseInt(all_possible_moves[i][1].slice(0, 1));
-    let dest_y = parseInt(all_possible_moves[i][1].slice(1, 2));
+  // 逐一檢查每一個可能的移動
+  for (let l = 0; l < all_possible_moves.length; l++) {
+    // if (l !== all_possible_moves.length - 1) continue;
+    let origin_x = parseInt(all_possible_moves[l][0].slice(0, 1));
+    let origin_y = parseInt(all_possible_moves[l][0].slice(1, 2));
+    let dest_x = parseInt(all_possible_moves[l][1].slice(0, 1));
+    let dest_y = parseInt(all_possible_moves[l][1].slice(1, 2));
     let line_score = 0;
+    let duplicate_record = JSON.parse(JSON.stringify(pieces_location_record));
 
     if (origin_x > 3) {
       // 若從場外拿棋子
@@ -112,181 +108,259 @@ function calc_best_move() {
       duplicate_record[dest_x][dest_y].push(moving_piece);
 
       // 逐一檢查落子處之所有可能連線
-      // 連線一: 直行
-      for (let i = 0; i < 4; i++) {
-        if (duplicate_record[i][dest_y].length === 0) continue;
-
-        if (duplicate_record[i][dest_y].at(-1)[0] === manVSMachine) {
-          // manchine方棋子個數
-          line_record[0][0]++;
-          if (duplicate_record[i][dest_y].at(-1)[1] === 4) {
-            line_record[0][1] = true;
-          }
-        } else {
-          // player方棋子個數
-          line_record[1][0]++;
-          if (duplicate_record[i][dest_y].at(-1)[1] === 4) {
-            line_record[1][1] = true;
-          }
-        }
-      }
-
-      line_score += calc_line_score(line_record);
-
-      // 連線二: 橫行
-      for (let i = 0; i < 4; i++) {
-        if (duplicate_record[dest_x][i].length === 0) continue;
-
-        if (duplicate_record[dest_x][i].at(-1)[0] === manVSMachine) {
-          // manchine方棋子個數
-          line_record[0][0]++;
-          if (duplicate_record[dest_x][i].at(-1)[1] === 4) {
-            line_record[0][1] = true;
-          }
-        } else {
-          // player方棋子個數
-          line_record[1][0]++;
-          if (duplicate_record[dest_x][i].at(-1)[1] === 4) {
-            line_record[1][1] = true;
-          }
-        }
-      }
-
-      line_score += calc_line_score(line_record);
-
-      // 連線三: 左上右下斜線
-      if (dest_x === dest_y) {
+      loop1: for (let j = 0; j < 4; j++) {
+        let current_line = [];
         for (let i = 0; i < 4; i++) {
-          if (duplicate_record[i][i].length === 0) continue;
+          if (j === 0) {
+            // 直行
+            current_line.push(duplicate_record[i][dest_y]);
+          } else if (j === 1) {
+            // 橫行
+            current_line.push(duplicate_record[dest_x][i]);
+          } else if (j === 2 && dest_x === dest_y) {
+            // 左上右下
+            current_line.push(duplicate_record[i][i]);
+          } else if (j === 3 && dest_x + dest_y === 3) {
+            // 左下右上
+            current_line.push(duplicate_record[i][3 - i]);
+          } else {
+            continue loop1;
+          }
+        }
 
-          if (duplicate_record[i][i].at(-1)[0] === manVSMachine) {
+        // 逐一檢查每一格子棋子個數
+        for (let i = 0; i < 4; i++) {
+          if (current_line[i].length === 0) continue;
+
+          if (current_line[i].at(-1)[0] === manVSMachine) {
             // manchine方棋子個數
-            line_record[0][0]++;
-            if (duplicate_record[i][i].at(-1)[1] === 4) {
-              line_record[0][1] = true;
-            }
+            line_record[0].push(current_line[i].at(-1)[1]);
           } else {
             // player方棋子個數
-            line_record[1][0]++;
-            if (duplicate_record[i][i].at(-1)[1] === 4) {
-              line_record[1][1] = true;
-            }
+            line_record[1].push(current_line[i].at(-1)[1]);
           }
         }
-        line_score += calc_line_score(line_record);
-      }
 
-      // 連線四: 左下右上斜線
-      if (dest_x + dest_y === 3) {
-        for (let i = 0; i < 4; i++) {
-          if (duplicate_record[i][3 - i].length === 0) continue;
-
-          if (duplicate_record[i][3 - i].at(-1)[0] === manVSMachine) {
-            // manchine方棋子個數
-            line_record[0][0]++;
-            if (duplicate_record[i][3 - i].at(-1)[1] === 4) {
-              line_record[0][1] = true;
-            }
-          } else {
-            // player方棋子個數
-            line_record[1][0]++;
-            if (duplicate_record[i][3 - i].at(-1)[1] === 4) {
-              line_record[1][1] = true;
-            }
-          }
-        }
-        line_score += calc_line_score(line_record);
+        let a = calc_line_score(line_record);
+        line_score += a;
       }
+      // console.log(line_score);
 
       // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
-      if (line_score > highest_score[0]) {
-        highest_score = [line_score, i];
+      if (line_score >= highest_score[0]) {
+        highest_score[0] = line_score;
+        highest_score[1] = l;
       }
-
-      line_score = 0;
     } else {
       // 若從場上拿棋子
-      // 逐一檢查起子處之所有可能連線
-      // 逐一檢查落子處之所有可能連線
-      // 加總所有連線的積分
-      // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
-    }
+      let moving_piece = duplicate_record[origin_x][origin_y].pop();
+      duplicate_record[dest_x][dest_y].push(moving_piece);
 
-    // 由highest_score的i找到all_possible_moves中積分最高的移動，並return之
+      // 逐一檢查起子處之所有可能連線
+      loop1: for (let j = 0; j < 4; j++) {
+        let current_line = [];
+        for (let i = 0; i < 4; i++) {
+          if (j === 0) {
+            // 直行
+            current_line.push(duplicate_record[i][origin_y]);
+          } else if (j === 1) {
+            // 橫行
+            current_line.push(duplicate_record[origin_x][i]);
+          } else if (j === 2 && origin_x === origin_y) {
+            // 左上右下
+            current_line.push(duplicate_record[i][i]);
+          } else if (j === 3 && origin_x + origin_y === 3) {
+            // 左下右上
+            current_line.push(duplicate_record[i][3 - i]);
+          } else {
+            continue loop1;
+          }
+        }
+
+        // 逐一檢查每一格子棋子個數
+        for (let i = 0; i < 4; i++) {
+          if (current_line[i].length === 0) continue;
+
+          if (current_line[i].at(-1)[0] === manVSMachine) {
+            // manchine方棋子個數
+            line_record[0].push(current_line[i].at(-1)[1]);
+          } else {
+            // player方棋子個數
+            line_record[1].push(current_line[i].at(-1)[1]);
+          }
+        }
+
+        let a = calc_initial_line_score(line_record);
+        line_score += a;
+      }
+
+      // 逐一檢查落子處之所有可能連線
+      loop1: for (let j = 0; j < 4; j++) {
+        let current_line = [];
+        for (let i = 0; i < 4; i++) {
+          if (j === 0) {
+            // 直行
+            current_line.push(duplicate_record[i][dest_y]);
+          } else if (j === 1) {
+            // 橫行
+            current_line.push(duplicate_record[dest_x][i]);
+          } else if (j === 2 && dest_x === dest_y) {
+            // 左上右下
+            current_line.push(duplicate_record[i][i]);
+          } else if (j === 3 && dest_x + dest_y === 3) {
+            // 左下右上
+            current_line.push(duplicate_record[i][3 - i]);
+          } else {
+            continue loop1;
+          }
+        }
+
+        // 逐一檢查每一格子棋子個數
+        for (let i = 0; i < 4; i++) {
+          if (current_line[i].length === 0) continue;
+
+          if (current_line[i].at(-1)[0] === manVSMachine) {
+            // manchine方棋子個數
+            line_record[0].push(current_line[i].at(-1)[1]);
+          } else {
+            // player方棋子個數
+            line_record[1].push(current_line[i].at(-1)[1]);
+          }
+        }
+
+        let a = calc_line_score(line_record);
+        line_score += a;
+      }
+
+      // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
+      if (line_score >= highest_score[0]) {
+        highest_score[0] = line_score;
+        highest_score[1] = l;
+      }
+    }
   }
 
   // console.log(duplicate_record);
   // console.log(pieces_location_record);
   /////
 
-  console.log(all_possible_moves);
+  // console.log(all_possible_moves);
 
-  return all_possible_moves[
-    Math.floor(Math.random() * all_possible_moves.length)
-  ];
+  return all_possible_moves[highest_score[1]];
+}
+
+function calc_initial_line_score(record) {
+  let score = 0;
+
+  // 扣掉起子處所在的此一連線上，對方棋子size的總和
+  if (record[1].length !== 0) {
+    for (let i = 0; i < record[1].length; i++) {
+      score -= record[1][i];
+    }
+  }
+
+  if (
+    record[1].length === 4 ||
+    (record[1].length === 3 &&
+      (record[0].length === 0 || jQuery.inArray(4, record[0]) === -1))
+  ) {
+    score -= 100;
+  }
+
+  line_record[0] = [];
+  line_record[1] = [];
+
+  return score;
 }
 
 function calc_line_score(record) {
   let score = 0;
 
-  if (record[0][0] === 4) {
-    score += 8;
+  // 落子後
+  // 加權machine方棋子size
+  for (let i = 0; i < record[0].length; i++) {
+    score += record[0][i];
   }
 
-  if (record[0][0] === 1 && record[1][0] === 3 && record[0][1]) {
-    score += 7;
+  // machine方棋子數量為4，分數加100
+  if (record[0].length === 4) {
+    score += 10000;
+  }
+
+  // machine方棋子數量為1，player方棋子數量為3，且machine方棋子size為4
+  if (
+    record[0].length === 1 &&
+    record[1].length === 3 &&
+    jQuery.inArray(4, record[0]) !== -1
+  ) {
+    score += 1000;
   }
 
   if (
-    ((record[0][0] === 3 && record[1][0] === 1) ||
-      (record[0][0] === 3 && record[1][0] === 0)) &&
-    !record[1][1]
+    (record[0].length === 3 &&
+      record[1].length === 1 &&
+      jQuery.inArray(4, record[1]) === -1) ||
+    (record[0].length === 3 && record[1].length === 0)
   ) {
-    score += 6;
+    score += 900;
   }
 
   if (
-    ((record[0][0] === 2 && record[1][0] === 2) ||
-      (record[0][0] === 2 && record[1][0] === 1) ||
-      (record[0][0] === 2 && record[1][0] === 0)) &&
-    !record[1][1]
+    (record[0].length === 2 &&
+      record[1].length === 2 &&
+      jQuery.inArray(4, record[1]) === -1) ||
+    (record[0].length === 2 &&
+      record[1].length === 1 &&
+      jQuery.inArray(4, record[1]) === -1) ||
+    (record[0].length === 2 && record[1].length === 0)
   ) {
-    score += 5;
+    score += 80;
   }
 
   if (
-    ((record[0][0] === 1 && record[1][0] === 2) ||
-      (record[0][0] === 1 && record[1][0] === 1) ||
-      (record[0][0] === 1 && record[1][0] === 0)) &&
-    !record[1][1]
+    (record[0].length === 1 &&
+      record[1].length === 2 &&
+      jQuery.inArray(4, record[1]) === -1) ||
+    (record[0].length === 1 &&
+      record[1].length === 1 &&
+      jQuery.inArray(4, record[1]) === -1) ||
+    (record[0].length === 1 && record[1].length === 0)
   ) {
-    score += 4;
+    score += 70;
   }
 
-  if (record[0][0] === 3 && record[1][0] === 1 && record[1][1]) {
+  if (
+    record[0].length === 3 &&
+    record[1].length === 1 &&
+    jQuery.inArray(4, record[1]) !== -1
+  ) {
     score += 3;
   }
 
   if (
-    ((record[0][0] === 2 && record[1][0] === 2) ||
-      (record[0][0] === 2 && record[1][0] === 1)) &&
-    record[1][1]
+    (record[0].length === 2 &&
+      record[1].length === 2 &&
+      jQuery.inArray(4, record[1]) !== -1) ||
+    (record[0].length === 2 &&
+      record[1].length === 1 &&
+      jQuery.inArray(4, record[1]) !== -1)
   ) {
     score += 2;
   }
 
   if (
-    ((record[0][0] === 1 && record[1][0] === 2) ||
-      (record[0][0] === 1 && record[1][0] === 1)) &&
-    record[1][1]
+    (record[0].length === 1 &&
+      record[1].length === 2 &&
+      jQuery.inArray(4, record[1]) !== -1) ||
+    (record[0].length === 1 &&
+      record[1].length === 1 &&
+      jQuery.inArray(4, record[1]) !== -1)
   ) {
     score += 1;
   }
 
-  line_record = [
-    [0, false],
-    [0, false],
-  ];
+  line_record[0] = [];
+  line_record[1] = [];
 
   return score;
 }
