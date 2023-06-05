@@ -178,6 +178,8 @@ function update_board_record(
 }
 
 function check_if_win() {
+  let cancel = false;
+
   setTimeout(() => {
     let if_4_black_pieces_in_line =
       jQuery.inArray(1, if_N_pieces_in_line(4)) !== -1;
@@ -193,14 +195,22 @@ function check_if_win() {
         round === 1
           ? alert("黑方獲勝!\n(拿起棋子時對方已經獲勝)")
           : alert("白方獲勝!\n(拿起棋子時對方已經獲勝)");
-        confirm("是否重置盤面?") && render_board();
-        return false;
+        if (confirm("是否重置盤面?")) {
+          render_board();
+        } else {
+          cancel = true;
+        }
       }
       if_4_black_pieces_in_line && alert("黑方獲勝!");
       if_4_white_pieces_in_line && alert("白方獲勝!");
 
-      confirm("是否重置盤面?") && render_board();
+      if (confirm("是否重置盤面?")) {
+        render_board();
+      } else {
+        cancel = true;
+      }
     }
+    if (cancel) return false;
 
     if (manVSMachine === round) {
       machine_move_piece();
