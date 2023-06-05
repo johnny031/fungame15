@@ -378,6 +378,28 @@ function render_board() {
       <a class="btn setting-btn">設定</a>
     </span>
     `);
+
+  if (manVSMachine === -1) {
+    // 雙人對戰
+    $(".container").attr("style", "--board-rotate: 0deg");
+  }
+
+  if (manVSMachine === 1) {
+    // 選擇白色
+    $(".container").attr("style", "--board-rotate: 0deg");
+    $(".setting-section:first-of-type .retract-btn").hide();
+  }
+
+  if (manVSMachine === 0) {
+    // 選擇黑色
+    $(".container").attr("style", "--board-rotate: 180deg");
+    $(".setting-section:first-of-type .setting-btn").attr(
+      "style",
+      "display: inline;"
+    );
+    $(".setting-section:last-of-type .setting-btn").hide();
+    $(".setting-section:last-of-type .retract-btn").hide();
+  }
 }
 
 function if_N_pieces_in_line(number) {
@@ -648,20 +670,17 @@ $("input[type=radio][name=mode]").change(function () {
   if (this.value == 0) {
     // 切換為雙人對戰
     $(".select-color-section").slideUp();
-    render_board();
     manVSMachine = -1;
-    $(".container").attr("style", "--board-rotate: 0deg");
+    render_board();
     $("input[type=radio][name=color]").prop("checked", false);
   } else if (this.value == 1) {
     // 切換為單機對戰
     $(".select-color-section").slideDown();
-    render_board();
 
     // 選擇白色
     manVSMachine = 1;
+    render_board();
     $("input[type=radio][name=color]#white").prop("checked", true);
-    $(".container").attr("style", "--board-rotate: 0deg");
-    $(".setting-section:first-of-type .retract-btn").hide();
   }
 });
 
@@ -669,21 +688,12 @@ $("input[type=radio][name=color]").change(function () {
   if_setting_changed = true;
   if (this.value == 0) {
     // 選擇白色
-    render_board();
     manVSMachine = 1;
-    $(".container").attr("style", "--board-rotate: 0deg");
-    $(".setting-section:first-of-type .retract-btn").hide();
+    render_board();
   } else if (this.value == 1) {
     // 選擇黑色
-    render_board();
     manVSMachine = 0;
-    $(".container").attr("style", "--board-rotate: 180deg");
-    $(".setting-section:first-of-type .setting-btn").attr(
-      "style",
-      "display: inline;"
-    );
-    $(".setting-section:last-of-type .setting-btn").hide();
-    $(".setting-section:last-of-type .retract-btn").hide();
+    render_board();
   }
 });
 
