@@ -13,6 +13,45 @@
 
 <body>
   <div class="container"></div>
+  <div class="setting-div">
+    <h1>設定</h1>
+    <div class="row">
+      <div class="subtitle">對戰模式</div>
+      <label class="input-container" for="manVSman">雙人
+        <input type="radio" id="manVSman" name="mode" value="0" checked="checked"> 
+        <span class="checkmark"></span>
+      </label>
+      <label class="input-container" for="manVSmachine">單機
+        <input type="radio" id="manVSmachine" name="mode" value="1">
+        <span class="checkmark"></span>
+      </label>
+    </div>
+    
+    <div class="row select-color-section" style="display:none;">
+      <div class="subtitle">選擇顏色</div>
+      <label class="input-container" for="white">白色
+        <input type="radio" id="white" name="color" value="0">
+        <span class="checkmark"></span>
+      </label>
+      <label class="input-container" for="black">黑色
+        <input type="radio" id="black" name="color" value="1">
+        <span class="checkmark"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="subtitle">限制時間</div>
+      <div>
+        <span>關</span>
+        <label class="switch">
+          <input type="checkbox" id="timer-checkbox">
+          <span class="slider round"></span>
+        </label>
+        <span>開</span>
+      </div>
+    </div> 
+  </div>
+  <div class="overlay"></div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="main.js"></script>

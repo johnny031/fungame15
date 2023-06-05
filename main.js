@@ -6,6 +6,7 @@ let timer_b = 4;
 let timer_w = 4;
 let fram_per_sec = 10;
 let timer_on = false;
+let if_setting_changed = false;
 let manVSMachine = -1; // -1: 雙人對戰, 0: 玩家執黑子, 1: 玩家執白子
 let move_record = [];
 let unused_pieces_record = [
@@ -69,6 +70,9 @@ function startTimerBar_w() {
       clearInterval(interval_timer_bar_w);
       if (timer_on) {
         change_round();
+        if (manVSMachine === round) {
+          machine_move_piece();
+        }
       }
     } else {
       timer_w -= 1 / fram_per_sec;
@@ -97,6 +101,9 @@ function startTimerBar_b() {
       clearInterval(interval_timer_bar_b);
       if (timer_on) {
         change_round();
+        if (manVSMachine === round) {
+          machine_move_piece();
+        }
       }
     } else {
       timer_b -= 1 / fram_per_sec;
@@ -229,6 +236,7 @@ function move_piece(destination_cell) {
 
   $(".selected").detach().appendTo(destination_cell);
   $(".selected").attr("data-used", "1");
+  $(".retract-btn").removeClass("disabled");
   change_round();
   check_if_win();
 }
@@ -291,6 +299,10 @@ function render_board() {
 
   $(".container").empty();
   $(".container").append(`
+    <span class="setting-section">
+      <a class="btn retract-btn disabled">悔棋</a> 
+      <a class="btn setting-btn">設定</a>
+    </span>
     <div class="timer_section">
       <div class="timer-bar-wrapper">
         <div class="timer-bar black"></div>
@@ -361,7 +373,11 @@ function render_board() {
       </div>
       <span class="timer-number" id="second_w">5</span>
     </div>
-  `);
+    <span class="setting-section">
+      <a class="btn retract-btn disabled">悔棋</a>
+      <a class="btn setting-btn">設定</a>
+    </span>
+    `);
 }
 
 function if_N_pieces_in_line(number) {
@@ -561,12 +577,6 @@ $(document).on("click", ".cell", function (event) {
   move_piece($(this));
 });
 
-$(document).on("dblclick", ".timer_section", function () {
-  confirm("請問要將設定改為「限制時間」嗎？\n若點選取消，則改為「不限制時間」")
-    ? (timer_on = true)
-    : (timer_on = false);
-});
-
 function retract_move(number) {
   for (let i = 0; i < number; i++) {
     update_board_record(
@@ -594,36 +604,102 @@ function retract_move(number) {
   }
 }
 
-$(document).on("dblclick", ".piece-section", function () {
-  if (move_record.length === 0) return false;
+$(document).on("click", ".retract-btn", function () {
+  if (
+    move_record.length === 0 ||
+    (move_record.length < 2 && manVSMachine > -1)
+  ) {
+    return false;
+  }
+
   if (!confirm("確定要悔一手嗎？")) return false;
 
   if (manVSMachine > -1 && move_record.length > 1) {
     retract_move(2);
-    return false;
   }
 
   if (manVSMachine === -1) retract_move(1);
+
+  if (
+    move_record.length === 0 ||
+    (move_record.length < 2 && manVSMachine > -1)
+  ) {
+    $(".retract-btn").addClass("disabled");
+  }
 });
 
-$(document).on("dblclick", ".board", function () {
-  if (manVSMachine === -1) {
-    if (confirm("確定切換為人機對戰嗎？")) {
-      render_board();
-      if (confirm("您要執黑子嗎？\n若點選取消，則執白子")) {
-        manVSMachine = 0;
-        $(".container").attr("style", "--board-rotate: 180deg");
-      } else {
-        manVSMachine = 1;
-        $(".container").attr("style", "--board-rotate: 0deg");
-        machine_move_piece();
-      }
+$(document).on("click", ".setting-btn", function () {
+  $(".setting-div, .overlay").show();
+});
+
+$(document).on("click", ".overlay", function () {
+  $(".setting-div, .overlay").hide();
+
+  if (if_setting_changed) {
+    if (manVSMachine === 1) {
+      machine_move_piece();
     }
+    if_setting_changed = false;
+  }
+});
+
+$("input[type=radio][name=mode]").change(function () {
+  if_setting_changed = true;
+  if (this.value == 0) {
+    // 切換為雙人對戰
+    $(".select-color-section").slideUp();
+    render_board();
+    manVSMachine = -1;
+    $(".container").attr("style", "--board-rotate: 0deg");
+    $("input[type=radio][name=color]").prop("checked", false);
+  } else if (this.value == 1) {
+    // 切換為單機對戰
+    $(".select-color-section").slideDown();
+    render_board();
+
+    // 選擇白色
+    manVSMachine = 1;
+    $("input[type=radio][name=color]#white").prop("checked", true);
+    $(".container").attr("style", "--board-rotate: 0deg");
+    $(".setting-section:first-of-type .retract-btn").hide();
+  }
+});
+
+$("input[type=radio][name=color]").change(function () {
+  if_setting_changed = true;
+  if (this.value == 0) {
+    // 選擇白色
+    render_board();
+    manVSMachine = 1;
+    $(".container").attr("style", "--board-rotate: 0deg");
+    $(".setting-section:first-of-type .retract-btn").hide();
+  } else if (this.value == 1) {
+    // 選擇黑色
+    render_board();
+    manVSMachine = 0;
+    $(".container").attr("style", "--board-rotate: 180deg");
+    $(".setting-section:first-of-type .setting-btn").attr(
+      "style",
+      "display: inline;"
+    );
+    $(".setting-section:last-of-type .setting-btn").hide();
+    $(".setting-section:last-of-type .retract-btn").hide();
+  }
+});
+
+$("#timer-checkbox").change(function () {
+  if (this.checked) {
+    // 限制時間
+    timer_on = true;
   } else {
-    if (confirm("確定切換為雙人對戰嗎？")) {
-      render_board();
-      manVSMachine = -1;
-      $(".container").attr("style", "--board-rotate: 0deg");
-    }
+    // 取消限制時間
+    timer_on = false;
+  }
+});
+
+$(document).on("click", "body", function () {
+  if (select) {
+    $(".selected").removeClass("selected");
+    select = false;
   }
 });

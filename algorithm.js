@@ -158,7 +158,7 @@ function calc_best_move() {
       line_score += score;
     }
 
-    console.log(line_score, l);
+    // console.log(line_score, l);
 
     // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
     if (
@@ -174,7 +174,7 @@ function calc_best_move() {
   // console.log(pieces_location_record);
   /////
 
-  console.log(all_possible_moves);
+  // console.log(all_possible_moves);
 
   return all_possible_moves[highest_score[1]];
 }
