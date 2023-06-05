@@ -218,7 +218,7 @@ function calc_line_score(record) {
       jQuery.inArray(4, record[1]) === -1) ||
     (record[0].length === 3 && record[1].length === 0)
   ) {
-    score += 900;
+    score += 3000;
   }
 
   if (
