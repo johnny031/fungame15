@@ -236,7 +236,7 @@ function move_piece(destination_cell) {
 
   $(".selected").detach().appendTo(destination_cell);
   $(".selected").attr("data-used", "1");
-  $(".retract-btn").removeClass("disabled");
+  $(".retract-btn, .restart-btn").removeClass("disabled");
   change_round();
   check_if_win();
 }
@@ -300,8 +300,9 @@ function render_board() {
   $(".container").empty();
   $(".container").append(`
     <span class="setting-section">
-      <a class="btn retract-btn disabled">悔棋</a> 
-      <a class="btn setting-btn">設定</a>
+      <a class="btn retract-btn disabled"><i class="fas fa-undo-alt"></i>悔棋</a> 
+      <a class="btn restart-btn disabled"><i class="fas fa-sync-alt"></i>重置</a>
+      <a class="btn setting-btn"><i class="fas fa-cog"></i>設定</a>
     </span>
     <div class="timer_section">
       <div class="timer-bar-wrapper">
@@ -374,8 +375,9 @@ function render_board() {
       <span class="timer-number" id="second_w">5</span>
     </div>
     <span class="setting-section">
-      <a class="btn retract-btn disabled">悔棋</a>
-      <a class="btn setting-btn">設定</a>
+      <a class="btn retract-btn disabled"><i class="fas fa-undo-alt"></i>悔棋</a>
+      <a class="btn restart-btn disabled"><i class="fas fa-sync-alt"></i>重置</a>
+      <a class="btn setting-btn"><i class="fas fa-cog"></i>設定</a>
     </span>
     `);
 
@@ -387,7 +389,9 @@ function render_board() {
   if (manVSMachine === 1) {
     // 選擇白色
     $(".container").attr("style", "--board-rotate: 0deg");
-    $(".setting-section:first-of-type .retract-btn").hide();
+    $(
+      ".setting-section:first-of-type .retract-btn, .setting-section:first-of-type .restart-btn"
+    ).hide();
   }
 
   if (manVSMachine === 0) {
@@ -397,8 +401,9 @@ function render_board() {
       "style",
       "display: inline;"
     );
-    $(".setting-section:last-of-type .setting-btn").hide();
-    $(".setting-section:last-of-type .retract-btn").hide();
+    $(
+      ".setting-section:last-of-type .setting-btn, .setting-section:last-of-type .retract-btn, .setting-section:last-of-type .restart-btn"
+    ).hide();
   }
 }
 
@@ -667,7 +672,7 @@ $(document).on("click", ".retract-btn", function () {
     move_record.length === 0 ||
     (move_record.length < 2 && manVSMachine > -1)
   ) {
-    $(".retract-btn").addClass("disabled");
+    $(".retract-btn, .restart-btn").addClass("disabled");
   }
 });
 
@@ -733,4 +738,20 @@ $(document).on("click", "body", function () {
     $(".selected").removeClass("selected");
     select = false;
   }
+});
+
+$(document).on("click", ".restart-btn", function () {
+  if (move_record.length === 0) return false;
+
+  if (!confirm("確定要重置嗎？")) return false;
+
+  render_board();
+
+  // 若為單機模式，且machine方執黑子，重置後，machine移動棋子
+  if (manVSMachine === 1 && move_record.length === 0) {
+    machine_move_piece();
+    return false;
+  }
+
+  move_record.length === 0 && $(".restart-btn").addClass("disabled");
 });

@@ -19,6 +19,7 @@ function machine_move_piece() {
     origin_piece.attr("data-used", "1");
     update_board_record(best_move[0], best_move[1]);
     move_record.push([best_move[0], best_move[1]]);
+    $(".restart-btn").removeClass("disabled");
     change_round();
     check_if_win();
   }, 400);
@@ -161,7 +162,7 @@ function calc_best_move() {
     // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
     if (
       line_score > highest_score[0] ||
-      (line_score === highest_score[0] && Math.random() < 0.2)
+      (line_score === highest_score[0] && Math.random() < 0.1)
     ) {
       highest_score[0] = line_score;
       highest_score[1] = l;
