@@ -7,7 +7,7 @@ let timer_w = 4;
 let fram_per_sec = 10;
 let timer_on = false;
 let if_setting_changed = false;
-let manVSMachine = -1; // -1: 雙人對戰, 0: 玩家執黑子, 1: 玩家執白子
+let manVSMachine = -1; // -1: 雙人對戰, 0: machine執白子, 1: machine執黑子
 let move_record = [];
 let unused_pieces_record = [
   [

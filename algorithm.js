@@ -3,6 +3,11 @@ let line_record = [
   [], // [在此可能連線中，player方所有棋子的size]
 ];
 
+let line_record2 = [
+  [], // [在此可能連線中，machine方所有棋子的size]
+  [], // [在此可能連線中，player方所有棋子的size]
+];
+
 function machine_move_piece() {
   let best_move = calc_best_move();
   if (best_move == undefined) return false;
@@ -115,6 +120,8 @@ function calc_best_move() {
 
     duplicate_record[dest_x][dest_y].push(moving_piece);
 
+    let free_pieces = get_free_pieces(duplicate_record);
+
     // 逐一檢查棋盤上所有可能連線
     for (let i = 0; i < 10; i++) {
       let current_line = [];
@@ -155,7 +162,7 @@ function calc_best_move() {
         }
       }
 
-      let score = calc_line_score(line_record);
+      let score = calc_line_score(line_record, i);
       line_score += score;
     }
 
@@ -172,13 +179,18 @@ function calc_best_move() {
   return all_possible_moves[highest_score[1]];
 }
 
-function calc_line_score(record) {
+function calc_line_score(record, current_line_index) {
   let score = 0;
 
   // 落子後
-  // 加權machine方棋子size
+  // 加上machine方棋子size
   for (let i = 0; i < record[0].length; i++) {
     score += record[0][i];
+  }
+
+  // 扣掉player方棋子size
+  for (let i = 0; i < record[1].length; i++) {
+    score -= record[1][i];
   }
 
   // machine方棋子數量為4
@@ -205,12 +217,24 @@ function calc_line_score(record) {
     score -= 10000;
   }
 
+  // 計算machine方size=4的數量
+  // let machine_piece_counts_sort_by_size = record[0].reduce(
+  //   (count, item) => ((count[item] = count[item] + 1 || 1), count),
+  //   {}
+  // );
+
+  // machine方棋子數量為3，player方棋子數量為1，且player方棋子size不為4 or
+  // machine方棋子數量為3，player方棋子數量為0
   if (
     (record[0].length === 3 &&
       record[1].length === 1 &&
       jQuery.inArray(4, record[1]) === -1) ||
     (record[0].length === 3 && record[1].length === 0)
   ) {
+    // 若player方棋子size=3，且machine方棋子size=4的數量為3
+    // if (record[1][0] === 3 && machine_piece_counts_sort_by_size[4] === 3) {
+    //   score -= 3000;
+    // }
     score += 3000;
   }
 
@@ -272,4 +296,100 @@ function calc_line_score(record) {
   line_record[1] = [];
 
   return score;
+}
+
+function get_free_pieces(duplicate_record) {
+  // 逐一檢查棋盤上所有可能連線
+  let free_pieces = [
+    [[], [], [], []],
+    [[], [], [], []],
+    [[], [], [], []],
+    [[], [], [], []],
+  ];
+
+  for (let i = 0; i < 10; i++) {
+    let current_line = [];
+
+    if (i < 4) {
+      // i = 0,1,2,3
+      for (let j = 0; j < 4; j++) {
+        // 橫行
+        current_line.push(duplicate_record[i][j]);
+      }
+    } else if (i >= 4 && i < 8) {
+      // i = 4,5,6,7
+      for (let j = 0; j < 4; j++) {
+        // 直行
+        current_line.push(duplicate_record[j][i - 4]);
+      }
+    } else if (i === 8) {
+      for (let j = 0; j < 4; j++) {
+        // 左上右下
+        current_line.push(duplicate_record[j][j]);
+      }
+    } else if (i === 9) {
+      for (let j = 0; j < 4; j++) {
+        // 左下右上
+        current_line.push(duplicate_record[j][3 - j]);
+      }
+    }
+
+    for (let k = 0; k < 4; k++) {
+      if (current_line[k].length === 0) continue;
+
+      if (current_line[k].at(-1)[0] === manVSMachine) {
+        // manchine方棋子個數
+        line_record2[0].push(current_line[k].at(-1)[1]);
+      } else {
+        // player方棋子個數
+        line_record2[1].push(current_line[k].at(-1)[1]);
+      }
+    }
+
+    let who_has_one_only = -1;
+
+    if (line_record2[0].length === 1 && line_record2[1].length === 3) {
+      // machine方棋子數量為1，player方棋子數量為3
+      who_has_one_only = manVSMachine;
+    } else if (line_record2[0].length === 3 && line_record2[1].length === 1) {
+      // machine方棋子數量為3，player方棋子數量為1
+      who_has_one_only = 1 - manVSMachine;
+    }
+
+    if (who_has_one_only === -1) {
+      continue;
+    }
+
+    for (let k = 0; k < 4; k++) {
+      // 現在正在第i條連線的第k的位置
+      if (current_line[k].at(-1)[0] === who_has_one_only) {
+        if (
+          current_line[k].at(-2) != undefined &&
+          current_line[k].at(-2)[0] !== current_line[k].at(-1)[0]
+        ) {
+          // 判斷為不自由棋子
+          if (i < 4) {
+            // i = 0,1,2,3 橫行
+            free_pieces[i][k].push(current_line[k].at(-1));
+          } else if (i >= 4 && i < 8) {
+            // i = 4,5,6,7 直行
+            free_pieces[k][i - 4].push(current_line[k].at(-1));
+          } else if (i === 8) {
+            // 左上右下
+            free_pieces[k][k].push(current_line[k].at(-1));
+          } else if (i === 9) {
+            // 右上左下
+            free_pieces[k][3 - k].push(current_line[k].at(-1));
+          }
+        }
+      }
+    }
+
+    line_record2[0] = [];
+    line_record2[1] = [];
+  }
+
+  // 不小心判斷成不自由的棋子，應把duplicated_record取最上面的棋子，扣掉不自由的棋子，才會得到自由棋子
+
+  return free_pieces;
 }
