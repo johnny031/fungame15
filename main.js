@@ -582,6 +582,15 @@ $(document).on("click", ".piece", function (event) {
     return false;
   }
 
+  // 如果現在為單機模式，且沒有已選取的棋子，且選擇的棋子為machine方的，則return false
+  if (
+    manVSMachine > -1 &&
+    !select &&
+    $(this).attr("data-color") == manVSMachine
+  ) {
+    return false;
+  }
+
   // 如果現在沒有已選取的棋子，且選擇的棋子為己方的，則選取之
   if (!select && $(this).attr("data-color") == round) {
     $(this).addClass("selected");
@@ -636,8 +645,20 @@ $(document).on("click", ".retract-btn", function () {
 
   if (!confirm("確定要悔一手嗎？")) return false;
 
-  if (manVSMachine > -1 && move_record.length > 1) {
+  if (manVSMachine === 1 && move_record.length % 2 === 1) {
     retract_move(2);
+  }
+
+  if (manVSMachine === 1 && move_record.length % 2 === 0) {
+    retract_move(1);
+  }
+
+  if (manVSMachine === 0 && move_record.length % 2 === 0) {
+    retract_move(2);
+  }
+
+  if (manVSMachine === 0 && move_record.length % 2 === 1) {
+    retract_move(1);
   }
 
   if (manVSMachine === -1) retract_move(1);

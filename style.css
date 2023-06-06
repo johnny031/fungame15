@@ -22,8 +22,9 @@ body {
 }
 
 .container {
-  --piece-section-length: 80vmin;
-  --piece-section-width: calc((100vmax - var(--piece-section-length)) / 2 - 2vmin);
+  --piece-section-length: 70vmin;
+  --piece-section-width: 22vmin;
+  /* --piece-section-width: calc((100vmax - var(--piece-section-length)) / 2 - 2vmin); */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -166,11 +167,12 @@ body {
 
 .btn {
  border: 1px solid black;
- border-radius: 1em;
- padding: 1vmin 2vmin;
+ border-radius: 1.5em;
+ padding: 0.3em 0.8em;
  margin: 0 1vmin;
  box-shadow: 0px 1px 1px rgb(172, 172, 172);
  cursor: pointer;
+ font-size: 0.8rem;
 }
 
 .btn:hover {
@@ -182,8 +184,8 @@ body {
 }
 
 .btn.disabled {
-  color: gray;
-  border: 1px solid gray;
+  color: rgb(171, 171, 171);
+  border: 1px solid rgb(171, 171, 171);
   box-shadow: none;
   cursor: default;
   background-color: transparent;
@@ -374,14 +376,35 @@ input:checked + .slider:before {
 
 @media screen and (min-width: 380px) {
   .container {
-    --piece-section-length: 70vmin;
-    --piece-section-width: 22vmin;
+    --piece-section-length: 65vmin;
+    --piece-section-width: 20vmin;
+  }
+
+  .btn {
+    font-size: 1rem;
+   }
+}
+
+@media screen and (min-width: 414px) {
+  .container {
+    --piece-section-length: 55vmin;
+    --piece-section-width: 17vmin;
   }
 }
 
-@media screen and (min-width: 450px) {
+@media screen and (min-width: 460px) {
   .container {
     --piece-section-length: 45vmin;
     --piece-section-width: 14vmin;
+  }
+}
+
+@media screen and (min-width: 560px) {
+  .container {
+    --piece-section-length: 43vmin;
+    --piece-section-width: 13vmin;
+  }
+  .btn {
+    font-size: 1.2rem;
   }
 }
