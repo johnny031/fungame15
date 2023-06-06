@@ -562,6 +562,23 @@ $(document).on("click", ".piece", function (event) {
     return false;
   }
 
+  // 若(目前有已選擇的棋子) and
+  // (點選的棋子為己方的棋子) and
+  // (點選的棋子並非已選擇的棋子) and
+  // (點選的棋子在場外 or 點選棋子的大小>=已選擇棋子的大小)
+  if (
+    select &&
+    parseInt($(this).attr("data-color")) === round &&
+    !$(this).hasClass("selected") &&
+    ($(this).attr("data-used") === "0" ||
+      parseInt($(this).attr("data-size")) >=
+        parseInt($(".selected").attr("data-size")))
+  ) {
+    $(".selected").removeClass("selected");
+    $(this).addClass("selected");
+    return false;
+  }
+
   // 若目前有已選擇的棋子，且點選的棋子在場內
   if (select && $(this).attr("data-used") === "1") {
     if (
