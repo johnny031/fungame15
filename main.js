@@ -184,6 +184,44 @@ function update_board_record(
   }
 }
 
+function check_if_win_when_detached(origin_position) {
+  let origin_x = parseInt(origin_position.slice(0, 1));
+  let origin_y = parseInt(origin_position.slice(1, 2));
+  let temp_record = JSON.parse(JSON.stringify(pieces_location_record));
+  let win = false;
+
+  if (origin_x > 3) return false;
+
+  temp_record[origin_x][origin_y].pop();
+
+  let if_4_pieces_in_line_white =
+    if_N_pieces_in_line(4, temp_record)[0].length !== 0;
+  let if_4_pieces_in_line_black =
+    if_N_pieces_in_line(4, temp_record)[1].length !== 0;
+
+  if (if_4_pieces_in_line_white || if_4_pieces_in_line_black) {
+    win = true;
+  }
+
+  if (win) {
+    setTimeout(() => {
+      clearInterval(interval_timer_bar_b);
+      clearInterval(interval_timer_bar_w);
+
+      if_4_pieces_in_line_black && alert("黑方獲勝!\n(拿起棋子時對方已經獲勝)");
+      if_4_pieces_in_line_white && alert("白方獲勝!\n(拿起棋子時對方已經獲勝)");
+
+      if (confirm("是否重置盤面?")) {
+        render_board();
+      } else {
+        // cancel = true;
+      }
+    }, 200);
+
+    return win;
+  }
+}
+
 function check_if_win() {
   let cancel = false;
 
@@ -228,16 +266,21 @@ function move_piece(destination_cell) {
   let origin_position = $(".selected").parent().attr("data-position");
   let destination_position = destination_cell.attr("data-position");
 
-  update_board_record(origin_position, destination_position);
-
   // update move record
   move_record.push([origin_position, destination_position]);
 
   $(".selected").detach().appendTo(destination_cell);
   $(".selected").attr("data-used", "1");
   $(".retract-btn, .restart-btn").removeClass("disabled");
-  change_round();
-  check_if_win();
+
+  if (check_if_win_when_detached(origin_position)) {
+    change_round();
+    update_board_record(origin_position, destination_position);
+  } else {
+    update_board_record(origin_position, destination_position);
+    change_round();
+    check_if_win();
+  }
 }
 
 function render_board() {
