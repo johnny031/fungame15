@@ -188,17 +188,15 @@ function check_if_win() {
   let cancel = false;
 
   setTimeout(() => {
-    let if_4_black_pieces_in_line =
-      jQuery.inArray(1, if_N_pieces_in_line(4)) !== -1;
-    let if_4_white_pieces_in_line =
-      jQuery.inArray(0, if_N_pieces_in_line(4)) !== -1;
+    let if_4_pieces_in_line_white = if_N_pieces_in_line(4)[0].length !== 0;
+    let if_4_pieces_in_line_black = if_N_pieces_in_line(4)[1].length !== 0;
 
     // 若發現有四子連線
-    if (if_N_pieces_in_line(4).length !== 0) {
+    if (if_4_pieces_in_line_white || if_4_pieces_in_line_black) {
       clearInterval(interval_timer_bar_b);
       clearInterval(interval_timer_bar_w);
       //若黑白雙方均有四子連線，拿起棋子時對方已勝利
-      if (if_4_black_pieces_in_line && if_4_white_pieces_in_line) {
+      if (if_4_pieces_in_line_white && if_4_pieces_in_line_black) {
         round === 1
           ? alert("黑方獲勝!\n(拿起棋子時對方已經獲勝)")
           : alert("白方獲勝!\n(拿起棋子時對方已經獲勝)");
@@ -207,14 +205,15 @@ function check_if_win() {
         } else {
           cancel = true;
         }
-      }
-      if_4_black_pieces_in_line && alert("黑方獲勝!");
-      if_4_white_pieces_in_line && alert("白方獲勝!");
-
-      if (confirm("是否重置盤面?")) {
-        render_board();
       } else {
-        cancel = true;
+        if_4_pieces_in_line_black && alert("黑方獲勝!");
+        if_4_pieces_in_line_white && alert("白方獲勝!");
+
+        if (confirm("是否重置盤面?")) {
+          render_board();
+        } else {
+          cancel = true;
+        }
       }
     }
     if (cancel) return false;
@@ -407,149 +406,6 @@ function render_board() {
   }
 }
 
-function if_N_pieces_in_line(number) {
-  let pieces_location = [];
-  let count_white = 0;
-  let count_black = 0;
-  let which_color_has_N_pieces_in_line = [];
-
-  $(".cell").each(function (index) {
-    if (index % 4 === 0) {
-      pieces_location.push([]);
-    }
-    pieces_location[Math.floor(index / 4)].push(
-      $(this).children(".piece").last().attr("data-color")
-    );
-  });
-
-  for (let i = 0; i < 4; i++) {
-    loop1: for (let j = 0; j < 4; j++) {
-      if (pieces_location[i][j] === "0") {
-        count_white++;
-      }
-      if (pieces_location[i][j] === "1") {
-        count_black++;
-      }
-      if (j === 3) {
-        if (count_black * count_white === 3) {
-          let color = 0;
-          if (count_black === 1) color = 1;
-
-          for (let k = 1; k <= 4; k++) {
-            let size = $(`.cell:nth-of-type(${i * 4 + k})`)
-              .children(`[data-color=${color}]`)
-              .last()
-              .attr("data-size");
-
-            if (size == 4) {
-              break loop1;
-            }
-          }
-        }
-        if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
-        if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
-      }
-    }
-    count_white = 0;
-    count_black = 0;
-  }
-
-  for (let i = 0; i < 4; i++) {
-    loop1: for (let j = 0; j < 4; j++) {
-      if (pieces_location[j][i] === "0") {
-        count_white++;
-      }
-      if (pieces_location[j][i] === "1") {
-        count_black++;
-      }
-      if (j === 3) {
-        if (count_black * count_white === 3) {
-          let color = 0;
-          if (count_black === 1) color = 1;
-
-          for (let k = 0; k <= 3; k++) {
-            let size = $(`.cell:nth-of-type(${k * 4 + i + 1})`)
-              .children(`[data-color=${color}]`)
-              .last()
-              .attr("data-size");
-
-            if (size == 4) {
-              break loop1;
-            }
-          }
-        }
-
-        if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
-        if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
-      }
-    }
-    count_white = 0;
-    count_black = 0;
-  }
-
-  loop1: for (let i = 0; i < 4; i++) {
-    if (pieces_location[i][i] === "0") {
-      count_white++;
-    }
-    if (pieces_location[i][i] === "1") {
-      count_black++;
-    }
-    if (i === 3) {
-      if (count_black * count_white === 3) {
-        let color = 0;
-        if (count_black === 1) color = 1;
-
-        for (let k = 1; k <= 16; k += 5) {
-          let size = $(`.cell:nth-of-type(${k})`) // 1,6,11,16
-            .children(`[data-color=${color}]`)
-            .last()
-            .attr("data-size");
-
-          if (size == 4) {
-            break loop1;
-          }
-        }
-      }
-
-      if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
-      if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
-    }
-  }
-  count_white = 0;
-  count_black = 0;
-
-  loop1: for (let i = 0, j = 3; i < 4, j >= 0; i++, j--) {
-    if (pieces_location[i][j] === "0") {
-      count_white++;
-    }
-    if (pieces_location[i][j] === "1") {
-      count_black++;
-    }
-    if (i === 3) {
-      if (count_black * count_white === 3) {
-        let color = 0;
-        if (count_black === 1) color = 1;
-
-        for (let k = 4; k <= 13; k += 3) {
-          let size = $(`.cell:nth-of-type(${k})`) // 4,7,10,13
-            .children(`[data-color=${color}]`)
-            .last()
-            .attr("data-size");
-
-          if (size == 4) {
-            break loop1;
-          }
-        }
-      }
-
-      if (count_white >= number) which_color_has_N_pieces_in_line.push(0);
-      if (count_black >= number) which_color_has_N_pieces_in_line.push(1);
-    }
-  }
-
-  return which_color_has_N_pieces_in_line;
-}
-
 render_board();
 
 $(document).on("click", ".piece", function (event) {
@@ -586,7 +442,7 @@ $(document).on("click", ".piece", function (event) {
         parseInt($(this).attr("data-size")) ||
       (parseInt($(this).attr("data-color")) === 1 - round &&
         $(".selected").attr("data-used") === "0" &&
-        jQuery.inArray(1 - round, if_N_pieces_in_line(3)) === -1)
+        if_N_pieces_in_line(3)[1 - round].length === 0)
     ) {
       // 如果行動棋子比目標棋子小，或(從場外拿棋子欲蓋住對方棋子時，對方尚未3子連線)
       return false;
@@ -610,7 +466,8 @@ $(document).on("click", ".piece", function (event) {
     !select &&
     $(this).attr("data-color") == manVSMachine
   ) {
-    return false;
+    // remember!!!
+    // return false;
   }
 
   // 如果現在沒有已選取的棋子，且選擇的棋子為己方的，則選取之
@@ -772,3 +629,21 @@ $(document).on("click", ".restart-btn", function () {
 
   move_record.length === 0 && $(".restart-btn").addClass("disabled");
 });
+
+function if_N_pieces_in_line(number, pieces_location = pieces_location_record) {
+  // [<白>, <黑>]
+  let result = [[], []];
+
+  let all_lines = get_all_lines(pieces_location);
+  let all_lines_record = get_all_lines_record(all_lines);
+
+  for (let i = 0; i < all_lines_record.length; i++) {
+    if (all_lines_record[i][0].length === number) {
+      result[0].push(i);
+    } else if (all_lines_record[i][1].length === number) {
+      result[1].push(i);
+    }
+  }
+
+  return result;
+}
