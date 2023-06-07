@@ -66,12 +66,31 @@ function calc_best_move() {
     }
   }
 
+  let duplicate_record = JSON.parse(JSON.stringify(pieces_location_record));
+
+  let lines = get_all_lines(duplicate_record);
+
+  let lines_record = get_all_lines_record(lines);
+
+  // true: 取得machine的自由棋子
+  let machine_free_pieces = get_free_pieces(
+    lines,
+    lines_record,
+    duplicate_record,
+    true
+  );
+
+  console.log(machine_free_pieces);
+
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       if (pieces_location_record[i][j].length === 0) continue;
 
-      if (pieces_location_record[i][j].at(-1)[0] === manVSMachine) {
-        // 若該子屬於machine持方，則可以選擇作為起手子
+      if (
+        pieces_location_record[i][j].at(-1)[0] === manVSMachine &&
+        machine_free_pieces[i][j].length !== 0
+      ) {
+        // 若該子屬於machine持方，且為自由棋子，則可以選擇作為起手子
         for (let k = 0; k < 4; k++) {
           for (let l = 0; l < 4; l++) {
             if (k === i && l === j) continue;
@@ -96,6 +115,7 @@ function calc_best_move() {
 
   // 逐一檢查每一個可能的移動
   console.log("----------------------------------");
+  console.log(all_possible_moves);
   for (let l = 0; l < all_possible_moves.length; l++) {
     // if (l !== 0) continue;
     // if (l !== all_possible_moves.length - 1) continue;
