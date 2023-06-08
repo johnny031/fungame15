@@ -673,7 +673,8 @@ function calc_cross_score(
       if (
         all_lines_record[index][manVSMachine].length === 1 &&
         all_lines_record[index][1 - manVSMachine].length === 2 &&
-        this_position_piece[0] !== 1 - manVSMachine
+        this_position_piece[0] !== 1 - manVSMachine &&
+        jQuery.inArray(4, all_lines_record[index][manVSMachine]) === -1
       ) {
         index_list.push(index);
       }
@@ -681,7 +682,17 @@ function calc_cross_score(
       if (
         all_lines_record[index][manVSMachine].length === 2 &&
         all_lines_record[index][1 - manVSMachine].length === 2 &&
-        this_position_piece[0] !== 1 - manVSMachine
+        this_position_piece[0] !== 1 - manVSMachine &&
+        jQuery.inArray(4, all_lines_record[index][manVSMachine]) === -1
+      ) {
+        index_list.push(index);
+      }
+
+      if (
+        all_lines_record[index][manVSMachine].length === 1 &&
+        all_lines_record[index][1 - manVSMachine].length === 3 &&
+        this_position_piece[0] === manVSMachine &&
+        jQuery.inArray(4, all_lines_record[index][manVSMachine]) === -1
       ) {
         index_list.push(index);
       }
@@ -713,30 +724,49 @@ function calc_cross_score(
     }
 
     if (index_list.length >= 2) {
+      // true: (X,2), false:(1,3),
+      // two_player_pieces = [false, false];
+      // two_player_pieces = [false, true];
+      let two_player_pieces = [];
+
+      for (let j = 0; j < index_list.length; j++) {
+        let machine = all_lines_record[index_list[j]][manVSMachine];
+        let player = all_lines_record[index_list[j]][1 - manVSMachine];
+        if (machine.length === 1 && player.length === 3) {
+          two_player_pieces[j] = false;
+        } else if (player.length === 2) {
+          two_player_pieces[j] = true;
+        }
+      }
+
       // 判斷此2或3條線段以外自由的player棋子能否蓋過該線段之machine棋子
 
       for (let i = 0; i < index_list.length; i++) {
-        if (index_list[i] < 4) {
-          // 0,1,2,3
-          for (let j = 0; j < 4; j++) {
-            // 橫行
-            player_free_pieces_out_of_line[index_list[i]][j].length = 0;
-          }
-        } else if (index_list[i] >= 4 && index_list[i] < 8) {
-          // 4,5,6,7
-          for (let j = 0; j < 4; j++) {
-            // 直行
-            player_free_pieces_out_of_line[j][index_list[i] - 4].length = 0;
-          }
-        } else if (index_list[i] === 8) {
-          for (let j = 0; j < 4; j++) {
-            // 左上右下
-            player_free_pieces_out_of_line[j][j].length = 0;
-          }
-        } else if (index_list[i] === 9) {
-          for (let j = 0; j < 4; j++) {
-            // 左下右上
-            player_free_pieces_out_of_line[j][3 - j].length = 0;
+        // 若此線段player只有2顆棋子，player的自由棋子要扣掉此線段上的2顆
+        // 若此線段player有3顆棋子，則不扣掉，3顆均納入為player自由棋子
+        if (two_player_pieces[i]) {
+          if (index_list[i] < 4) {
+            // 0,1,2,3
+            for (let j = 0; j < 4; j++) {
+              // 橫行
+              player_free_pieces_out_of_line[index_list[i]][j].length = 0;
+            }
+          } else if (index_list[i] >= 4 && index_list[i] < 8) {
+            // 4,5,6,7
+            for (let j = 0; j < 4; j++) {
+              // 直行
+              player_free_pieces_out_of_line[j][index_list[i] - 4].length = 0;
+            }
+          } else if (index_list[i] === 8) {
+            for (let j = 0; j < 4; j++) {
+              // 左上右下
+              player_free_pieces_out_of_line[j][j].length = 0;
+            }
+          } else if (index_list[i] === 9) {
+            for (let j = 0; j < 4; j++) {
+              // 左下右上
+              player_free_pieces_out_of_line[j][3 - j].length = 0;
+            }
           }
         }
       }
@@ -752,6 +782,7 @@ function calc_cross_score(
               player_free_pieces_out_of_line[i][j][1]
             );
           }
+
           if (all_machine_free_pieces[i][j].length !== 0) {
             available_free_machine_pieces.push(
               all_machine_free_pieces[i][j][1]
@@ -776,13 +807,16 @@ function calc_cross_score(
 
       // 最大的自由的player棋子 >= 最大的自由的machine棋子 且
       // 此位置沒有棋子 或 最大的自由的player棋子比此位置的棋子大 且
-      // 兩條線內沒有size=4的machine棋子
+      // 兩條線內沒有size=4的machine棋子 且
+      // 最大的自由的player棋子 > 最大的位於線上的machine
       if (
         Math.max(...available_free_player_pieces) >=
           Math.max(...available_free_machine_pieces) &&
         (this_position_piece.length === 0 ||
           Math.max(...available_free_player_pieces) > this_position_piece[1]) &&
-        jQuery.inArray(4, weak_machine_pieces) === -1
+        jQuery.inArray(4, weak_machine_pieces) === -1 &&
+        Math.max(...available_free_player_pieces) >
+          Math.max(...weak_machine_pieces)
       ) {
         let minus_score = true;
 
