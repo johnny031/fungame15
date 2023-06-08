@@ -680,10 +680,24 @@ function if_N_pieces_in_line(number, pieces_location = pieces_location_record) {
   let all_lines = get_all_lines(pieces_location);
   let all_lines_record = get_all_lines_record(all_lines);
 
-  for (let i = 0; i < all_lines_record.length; i++) {
+  loop1: for (let i = 0; i < all_lines_record.length; i++) {
     if (all_lines_record[i][0].length === number) {
+      if (
+        number === 3 &&
+        all_lines_record[i][1].length === 1 &&
+        all_lines_record[i][1][0] === 4
+      ) {
+        continue loop1;
+      }
       result[0].push(i);
     } else if (all_lines_record[i][1].length === number) {
+      if (
+        number === 3 &&
+        all_lines_record[i][0].length === 1 &&
+        all_lines_record[i][0][0] === 4
+      ) {
+        continue loop1;
+      }
       result[1].push(i);
     }
   }
