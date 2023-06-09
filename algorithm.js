@@ -182,10 +182,12 @@ function calc_best_move() {
     );
     line_score += score_cross;
 
-    console.log(`第${l}個移動：${line_score}`);
+    // console.log(`score_cross: ${score_cross}`);
+    // console.log(`第${l}個移動：${line_score}`);
 
     // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
     if (
+      l === 0 ||
       line_score > highest_score[0] ||
       (line_score === highest_score[0] && Math.random() < 0.1)
     ) {
@@ -195,7 +197,7 @@ function calc_best_move() {
 
     console.log(highest_score);
   }
-  // remember!!!
+
   return all_possible_moves[highest_score[1]];
 }
 
@@ -279,10 +281,6 @@ function calc_line_score(
 
     // 若其中有size比此線段machine方棋子大的，才扣分
     let already_minus = false;
-
-    console.log("player_free_pieces_out_of_line");
-    console.log(player_free_pieces_out_of_line);
-    console.log(record[manVSMachine]);
 
     loop1: for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 4; j++) {
@@ -625,7 +623,7 @@ function calc_cross_score(
     [3, 7, 8],
   ];
 
-  for (let i = 0; i < line_index.length; i++) {
+  outer_loop: for (let i = 0; i < line_index.length; i++) {
     let player_free_pieces_out_of_line = JSON.parse(
       JSON.stringify(player_free_pieces)
     );
@@ -849,6 +847,7 @@ function calc_cross_score(
 
         if (minus_score) {
           score -= 9000;
+          continue outer_loop;
         }
       }
       // console.log(available_free_player_pieces);
@@ -858,3 +857,9 @@ function calc_cross_score(
 
   return score;
 }
+
+// $("body").on("dblclick", function () {
+//   manVSMachine = 1;
+//   machine_move_piece();
+//   manVSMachine = -1;
+// });

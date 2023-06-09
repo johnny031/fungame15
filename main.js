@@ -509,8 +509,7 @@ $(document).on("click", ".piece", function (event) {
     !select &&
     $(this).attr("data-color") == manVSMachine
   ) {
-    // remember!!!
-    // return false;
+    return false;
   }
 
   // 如果現在沒有已選取的棋子，且選擇的棋子為己方的，則選取之
