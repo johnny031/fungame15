@@ -80,7 +80,7 @@ function calc_best_move() {
     true
   );
 
-  console.log(machine_free_pieces);
+  // console.log(machine_free_pieces);
 
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
@@ -182,8 +182,8 @@ function calc_best_move() {
     );
     line_score += score_cross;
 
-    // console.log(`score_cross: ${score_cross}`);
-    // console.log(`第${l}個移動：${line_score}`);
+    console.log(`score_cross: ${score_cross}`);
+    console.log(`第${l}個移動：${line_score}`);
 
     // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
     if (
@@ -289,7 +289,6 @@ function calc_line_score(
             player_free_pieces_out_of_line[i][j][1] > record[manVSMachine][0]
           ) {
             score -= 10000;
-            console.log(`扣一萬分! 分數：${score}`);
             already_minus = true;
             break loop1;
           }
@@ -847,7 +846,7 @@ function calc_cross_score(
 
         if (minus_score) {
           score -= 9000;
-          continue outer_loop;
+          break outer_loop;
         }
       }
       // console.log(available_free_player_pieces);
@@ -858,8 +857,8 @@ function calc_cross_score(
   return score;
 }
 
-// $("body").on("dblclick", function () {
-//   manVSMachine = 1;
-//   machine_move_piece();
-//   manVSMachine = -1;
-// });
+$("body").on("dblclick", function () {
+  manVSMachine = 1;
+  machine_move_piece();
+  manVSMachine = -1;
+});
