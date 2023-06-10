@@ -14,6 +14,9 @@ function machine_move_piece() {
     origin_piece.attr("data-used", "1");
     update_board_record(best_move[0], best_move[1]);
     move_record.push([best_move[0], best_move[1]]);
+    if (move_record.length >= 2) {
+      $(".retract-btn").removeClass("disabled");
+    }
     $(".restart-btn").removeClass("disabled");
     change_round();
     check_if_win();

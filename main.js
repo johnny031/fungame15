@@ -70,6 +70,7 @@ function startTimerBar_w() {
       clearInterval(interval_timer_bar_w);
       if (timer_on) {
         change_round();
+        move_record.push([]);
         if (manVSMachine === round) {
           machine_move_piece();
         }
@@ -101,6 +102,7 @@ function startTimerBar_b() {
       clearInterval(interval_timer_bar_b);
       if (timer_on) {
         change_round();
+        move_record.push([]);
         if (manVSMachine === round) {
           machine_move_piece();
         }
@@ -531,6 +533,15 @@ $(document).on("click", ".cell", function (event) {
 
 function retract_move(number) {
   for (let i = 0; i < number; i++) {
+    if (move_record[move_record.length - 1].length === 0) {
+      move_record.pop();
+      change_round(true);
+      if (manVSMachine === -1) {
+        retract_move(1);
+      }
+      continue;
+    }
+
     update_board_record(
       move_record[move_record.length - 1][0],
       move_record[move_record.length - 1][1],
@@ -584,11 +595,10 @@ $(document).on("click", ".retract-btn", function () {
 
   if (manVSMachine === -1) retract_move(1);
 
-  if (
-    move_record.length === 0 ||
-    (move_record.length < 2 && manVSMachine > -1)
-  ) {
+  if (move_record.length === 0) {
     $(".retract-btn, .restart-btn").addClass("disabled");
+  } else if (move_record.length < 2 && manVSMachine > -1) {
+    $(".retract-btn").addClass("disabled");
   }
 });
 
