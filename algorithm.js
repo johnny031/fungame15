@@ -744,12 +744,23 @@ function calc_cross_score(
   ];
 
   outer_loop: for (let i = 0; i < line_index.length; i++) {
+    // 計算玩家雙活三情況所設變數
     let player_free_pieces_out_of_line = JSON.parse(
       JSON.stringify(player_free_pieces)
     );
     let all_machine_free_pieces = JSON.parse(
       JSON.stringify(machine_free_pieces)
     );
+
+    // 計算我方雙活三情況所設變數
+    let all_player_free_pieces = JSON.parse(JSON.stringify(player_free_pieces));
+    let machine_free_pieces_out_of_line1 = JSON.parse(
+      JSON.stringify(machine_free_pieces)
+    );
+    let machine_free_pieces_out_of_line2 = JSON.parse(
+      JSON.stringify(machine_free_pieces)
+    );
+
     let this_position_piece;
     let coordinate;
     if (i >= 0 && i < 4) {
@@ -973,16 +984,178 @@ function calc_cross_score(
       // console.log(available_free_player_pieces);
       // console.log(weak_machine_pieces);
     }
+
+    // index_list2: 在目前格子中，有(3,0)或(3,1)的線段編號
+    let index_list2 = [];
+
+    for (let j = 0; j < line_index[i].length; j++) {
+      let index = line_index[i][j];
+      // 若該條線上，我方棋子數量為3 且
+      // 玩家棋子數量為0 且
+      // 交叉點上為我方的棋子 且
+      if (
+        all_lines_record[index][manVSMachine].length === 3 &&
+        all_lines_record[index][1 - manVSMachine].length === 0 &&
+        this_position_piece[0] === manVSMachine
+      ) {
+        index_list2.push(index);
+      }
+
+      // 若該條線上，我方棋子數量為3 且
+      // 玩家棋子數量為1 且
+      // 交叉點上為我方的棋子 且
+      // 該條線上玩家的棋子大小不為4
+      if (
+        all_lines_record[index][manVSMachine].length === 3 &&
+        all_lines_record[index][1 - manVSMachine].length === 1 &&
+        this_position_piece[0] === manVSMachine &&
+        jQuery.inArray(4, all_lines_record[index][1 - manVSMachine]) === -1
+      ) {
+        index_list2.push(index);
+      }
+    }
+
+    // 若有3條關鍵連線，選取較為弱勢的兩條
+    if (index_list2.length === 3) {
+      let score_list = [];
+
+      for (let i = 0; i < index_list2.length; i++) {
+        let machine_pieces = all_lines_record[index_list2[i]][manVSMachine];
+        let score = 0;
+
+        for (let j = 0; j < machine_pieces.length; j++) {
+          if (machine_pieces[j] === 4) {
+            score += 100;
+          } else {
+            score += machine_pieces[j];
+          }
+        }
+        score_list.push(score);
+      }
+
+      let maximum = Math.max(...score_list);
+
+      let index = score_list.indexOf(maximum);
+      if (index !== -1) {
+        index_list2.splice(index, 1);
+      }
+    }
+
+    if (index_list2.length >= 2) {
+      // 判斷此2條線段以外自由的player棋子能否蓋過該線段之machine棋子
+
+      // 若此線段player只有2顆棋子，player的自由棋子要扣掉此線段上的2顆
+      if (index_list2[0] < 4) {
+        // 0,1,2,3
+        for (let j = 0; j < 4; j++) {
+          // 橫行
+          machine_free_pieces_out_of_line1[index_list2[0]][j].length = 0;
+        }
+      } else if (index_list2[0] >= 4 && index_list2[0] < 8) {
+        // 4,5,6,7
+        for (let j = 0; j < 4; j++) {
+          // 直行
+          machine_free_pieces_out_of_line1[j][index_list2[0] - 4].length = 0;
+        }
+      } else if (index_list2[0] === 8) {
+        for (let j = 0; j < 4; j++) {
+          // 左上右下
+          machine_free_pieces_out_of_line1[j][j].length = 0;
+        }
+      } else if (index_list2[0] === 9) {
+        for (let j = 0; j < 4; j++) {
+          // 左下右上
+          machine_free_pieces_out_of_line1[j][3 - j].length = 0;
+        }
+      }
+
+      if (index_list2[1] < 4) {
+        // 0,1,2,3
+        for (let j = 0; j < 4; j++) {
+          // 橫行
+          machine_free_pieces_out_of_line2[index_list2[1]][j].length = 0;
+        }
+      } else if (index_list2[1] >= 4 && index_list2[1] < 8) {
+        // 4,5,6,7
+        for (let j = 0; j < 4; j++) {
+          // 直行
+          machine_free_pieces_out_of_line2[j][index_list2[1] - 4].length = 0;
+        }
+      } else if (index_list2[1] === 8) {
+        for (let j = 0; j < 4; j++) {
+          // 左上右下
+          machine_free_pieces_out_of_line2[j][j].length = 0;
+        }
+      } else if (index_list2[1] === 9) {
+        for (let j = 0; j < 4; j++) {
+          // 左下右上
+          machine_free_pieces_out_of_line2[j][3 - j].length = 0;
+        }
+      }
+
+      let available_all_player_free_pieces = [];
+      let available_free_machine_pieces_out_of_line1 = [];
+      let available_free_machine_pieces_out_of_line2 = [];
+      let weak_player_pieces1 = 0;
+      let weak_player_pieces2 = 0;
+
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (all_player_free_pieces[i][j].length !== 0) {
+            available_all_player_free_pieces.push(
+              all_player_free_pieces[i][j][1]
+            );
+          }
+
+          if (machine_free_pieces_out_of_line1[i][j].length !== 0) {
+            available_free_machine_pieces_out_of_line1.push(
+              machine_free_pieces_out_of_line1[i][j][1]
+            );
+          }
+
+          if (machine_free_pieces_out_of_line2[i][j].length !== 0) {
+            available_free_machine_pieces_out_of_line2.push(
+              machine_free_pieces_out_of_line2[i][j][1]
+            );
+          }
+        }
+      }
+
+      for (let j = 0; j < index_list2.length; j++) {
+        let this_line_record =
+          all_lines_record[index_list2[j]][1 - manVSMachine];
+        if (this_line_record.length === 0) continue;
+
+        if (j === 0) weak_player_pieces1 = this_line_record[0];
+        if (j === 1) weak_player_pieces2 = this_line_record[0];
+      }
+
+      if (
+        this_position_piece[1] >=
+          Math.max(...available_all_player_free_pieces) &&
+        Math.max(...available_free_machine_pieces_out_of_line1) >
+          weak_player_pieces1 &&
+        Math.max(...available_free_machine_pieces_out_of_line2) >
+          weak_player_pieces2
+      ) {
+        score += 150000000;
+        break outer_loop;
+      }
+
+      // console.log(available_free_player_pieces);
+      // console.log(weak_machine_pieces);
+    }
   }
 
   return score;
 }
 
-function move_piece_debug(number) {
+function debug_move_piece(number) {
   manVSMachine = number;
   machine_move_piece();
+  manVSMachine = -1;
 }
 
-function change_mode_debug(number) {
+function debug_change_mode(number) {
   manVSMachine = number;
 }
