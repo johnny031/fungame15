@@ -244,6 +244,8 @@ function check_if_win() {
           render_board();
         } else {
           cancel = true;
+          ///remember
+          clearInterval(interval_test);
         }
       } else {
         if_4_pieces_in_line_black && alert("黑方獲勝!");
@@ -253,6 +255,8 @@ function check_if_win() {
           render_board();
         } else {
           cancel = true;
+          ///remember
+          clearInterval(interval_test);
         }
       }
     }

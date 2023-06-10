@@ -234,12 +234,12 @@ function calc_line_score(
 
   // machine方棋子數量為4
   if (record[manVSMachine].length === 4) {
-    score += 5000000;
+    score += 5000000000;
   }
 
   // player方棋子數量為4
   if (record[1 - manVSMachine].length === 4) {
-    score -= 5000000;
+    score -= 5000000000;
   }
 
   // machine方棋子數量為0，且player方棋子數量為3
@@ -247,7 +247,7 @@ function calc_line_score(
     record[manVSMachine].length === 0 &&
     record[1 - manVSMachine].length === 3
   ) {
-    score -= 1000000;
+    score -= 1000000000;
   }
 
   // machine方棋子數量為1，player方棋子數量為3
@@ -291,7 +291,7 @@ function calc_line_score(
           if (
             player_free_pieces_out_of_line[i][j][1] > record[manVSMachine][0]
           ) {
-            score -= 900000;
+            score -= 900000000;
             already_minus = true;
             break loop1;
           }
@@ -309,7 +309,7 @@ function calc_line_score(
           player_unused_pieces[i][1] > record[manVSMachine][0] &&
           if_N_pieces_in_line(3, duplicate_record)[manVSMachine] !== -1
         ) {
-          score -= 900000;
+          score -= 900000000;
           break loop1;
         }
       }
@@ -358,7 +358,7 @@ function calc_line_score(
             machine_free_pieces_out_of_line[i][j][1] >
             record[1 - manVSMachine][0]
           ) {
-            score += 90000;
+            score += 90000000;
             already_plus = true;
             break loop1;
           }
@@ -376,7 +376,7 @@ function calc_line_score(
           machine_unused_pieces[i][1] > record[1 - manVSMachine][0] &&
           if_N_pieces_in_line(3, duplicate_record)[1 - manVSMachine] !== -1
         ) {
-          score += 90000;
+          score += 90000000;
           break loop1;
         }
       }
@@ -388,14 +388,37 @@ function calc_line_score(
     record[manVSMachine].length === 3 &&
     record[1 - manVSMachine].length === 0
   ) {
-    score += 100000;
+    score += 100000000;
+  }
+
+  if (
+    record[manVSMachine].length === 0 &&
+    record[1 - manVSMachine].length === 2
+  ) {
+    score -= 10000000;
+  }
+
+  if (
+    record[manVSMachine].length === 1 &&
+    record[1 - manVSMachine].length === 2 &&
+    jQuery.inArray(4, record[manVSMachine]) === -1
+  ) {
+    score -= 9000000;
+  }
+
+  if (
+    record[manVSMachine].length === 2 &&
+    record[1 - manVSMachine].length === 2 &&
+    jQuery.inArray(4, record[manVSMachine]) === -1
+  ) {
+    score -= 8000000;
   }
 
   if (
     record[manVSMachine].length === 2 &&
     record[1 - manVSMachine].length === 0
   ) {
-    score += 10000;
+    score += 1000000;
   }
 
   if (
@@ -403,11 +426,57 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[1 - manVSMachine]) === -1
   ) {
-    score += 9000;
+    score += 900000;
   }
 
   if (
     record[manVSMachine].length === 2 &&
+    record[1 - manVSMachine].length === 2 &&
+    jQuery.inArray(4, record[1 - manVSMachine]) === -1
+  ) {
+    score += 800000;
+  }
+
+  if (
+    record[manVSMachine].length === 0 &&
+    record[1 - manVSMachine].length === 1
+  ) {
+    score -= 100000;
+  }
+
+  if (
+    record[manVSMachine].length === 1 &&
+    record[1 - manVSMachine].length === 1 &&
+    jQuery.inArray(4, record[manVSMachine]) === -1
+  ) {
+    score -= 90000;
+  }
+
+  if (
+    record[manVSMachine].length === 2 &&
+    record[1 - manVSMachine].length === 1 &&
+    jQuery.inArray(4, record[manVSMachine]) === -1
+  ) {
+    score -= 80000;
+  }
+
+  if (
+    record[manVSMachine].length === 1 &&
+    record[1 - manVSMachine].length === 0
+  ) {
+    score += 10000;
+  }
+
+  if (
+    record[manVSMachine].length === 1 &&
+    record[1 - manVSMachine].length === 1 &&
+    jQuery.inArray(4, record[1 - manVSMachine]) === -1
+  ) {
+    score += 9000;
+  }
+
+  if (
+    record[manVSMachine].length === 1 &&
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[1 - manVSMachine]) === -1
   ) {
@@ -416,25 +485,42 @@ function calc_line_score(
 
   if (
     record[manVSMachine].length === 1 &&
-    record[1 - manVSMachine].length === 0
+    record[1 - manVSMachine].length === 3 &&
+    jQuery.inArray(4, record[manVSMachine]) !== -1
   ) {
-    score += 1000;
-  }
-
-  if (
-    record[manVSMachine].length === 1 &&
-    record[1 - manVSMachine].length === 1 &&
-    jQuery.inArray(4, record[1 - manVSMachine]) === -1
-  ) {
-    score += 900;
+    score -= 1000;
   }
 
   if (
     record[manVSMachine].length === 1 &&
     record[1 - manVSMachine].length === 2 &&
-    jQuery.inArray(4, record[1 - manVSMachine]) === -1
+    jQuery.inArray(4, record[manVSMachine]) !== -1
   ) {
-    score += 800;
+    score -= 900;
+  }
+
+  if (
+    record[manVSMachine].length === 2 &&
+    record[1 - manVSMachine].length === 2 &&
+    jQuery.inArray(4, record[manVSMachine]) !== -1
+  ) {
+    score -= 800;
+  }
+
+  if (
+    record[manVSMachine].length === 1 &&
+    record[1 - manVSMachine].length === 1 &&
+    jQuery.inArray(4, record[manVSMachine]) !== -1
+  ) {
+    score -= 700;
+  }
+
+  if (
+    record[manVSMachine].length === 2 &&
+    record[1 - manVSMachine].length === 1 &&
+    jQuery.inArray(4, record[manVSMachine]) !== -1
+  ) {
+    score -= 600;
   }
 
   if (
@@ -880,7 +966,7 @@ function calc_cross_score(
         }
 
         if (minus_score) {
-          score -= 10000;
+          score -= 150000000;
           break outer_loop;
         }
       }
@@ -895,7 +981,6 @@ function calc_cross_score(
 function move_piece_debug(number) {
   manVSMachine = number;
   machine_move_piece();
-  manVSMachine = -1;
 }
 
 function change_mode_debug(number) {
