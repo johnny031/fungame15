@@ -207,7 +207,7 @@ function calc_best_move() {
         (machine_unused_pieces[origin_y][1] === 2 && !use_size_2) ||
         (machine_unused_pieces[origin_y][1] === 1 && !use_size_1)
       ) {
-        line_score -= 500000000;
+        line_score -= 300000000;
       } else {
         line_score += 30000000;
       }
@@ -221,6 +221,16 @@ function calc_best_move() {
     duplicate_record[dest_x][dest_y].push(moving_piece);
 
     console.log(duplicate_record);
+
+    let dest_piece_second_to_last = duplicate_record[dest_x][dest_y].at(-2);
+
+    // 若從場外拿棋子
+    if (origin_x > 3 && dest_piece_second_to_last != undefined) {
+      // 且蓋住的是玩家的棋子
+      if (dest_piece_second_to_last[0] === 1 - manVSMachine) {
+        line_score += 300000000;
+      }
+    }
 
     // 若存在下面一顆棋子
     for (let i = 0; i < 4; i++) {
