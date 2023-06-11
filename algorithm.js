@@ -40,6 +40,76 @@ function calc_best_move() {
     unused_pieces_record[1 - manVSMachine][2].at(-1),
   ];
 
+  let used_player_size_3 = 0;
+  let used_player_size_2 = 0;
+  let used_player_size_1 = 0;
+  let used_machine_size_3 = 0;
+  let used_machine_size_2 = 0;
+  let used_machine_size_1 = 0;
+  let use_size_3 = false;
+  let use_size_2 = false;
+  let use_size_1 = false;
+
+  for (let i = 0; i < player_unused_pieces.length; i++) {
+    if (
+      player_unused_pieces[i] == undefined ||
+      player_unused_pieces[i][1] < 3
+    ) {
+      used_player_size_3++;
+    }
+  }
+
+  for (let i = 0; i < player_unused_pieces.length; i++) {
+    if (
+      player_unused_pieces[i] == undefined ||
+      player_unused_pieces[i][1] < 2
+    ) {
+      used_player_size_2++;
+    }
+  }
+
+  for (let i = 0; i < player_unused_pieces.length; i++) {
+    if (player_unused_pieces[i] == undefined) {
+      used_player_size_1++;
+    }
+  }
+
+  for (let i = 0; i < machine_unused_pieces.length; i++) {
+    if (
+      machine_unused_pieces[i] == undefined ||
+      machine_unused_pieces[i][1] < 3
+    ) {
+      used_machine_size_3++;
+    }
+  }
+
+  for (let i = 0; i < machine_unused_pieces.length; i++) {
+    if (
+      machine_unused_pieces[i] == undefined ||
+      machine_unused_pieces[i][1] < 2
+    ) {
+      used_machine_size_2++;
+    }
+  }
+
+  for (let i = 0; i < machine_unused_pieces.length; i++) {
+    if (machine_unused_pieces[i] == undefined) {
+      used_machine_size_1++;
+    }
+  }
+
+  if (used_player_size_3 > used_machine_size_3) {
+    use_size_3 = true;
+  }
+
+  if (used_player_size_2 > used_machine_size_2) {
+    use_size_2 = true;
+  }
+
+  if (used_player_size_1 > used_machine_size_1) {
+    use_size_1 = true;
+  }
+
   for (let i = 0; i < machine_unused_pieces.length; i++) {
     if (machine_unused_pieces[i] == undefined) continue;
 
@@ -114,12 +184,12 @@ function calc_best_move() {
     }
   }
 
-  let highest_score = [0, 0]; // [<當前最高積分>, <i>]
+  let highest_score = [-Infinity, 0]; // [<當前最高積分>, <i>]
 
   // 逐一檢查每一個可能的移動
   console.log("----------------------------------");
   console.log(all_possible_moves);
-  for (let l = 0; l < all_possible_moves.length; l++) {
+  outer_loop: for (let l = 0; l < all_possible_moves.length; l++) {
     // if (l !== 0) continue;
     // if (l !== all_possible_moves.length - 1) continue;
     let origin_x = parseInt(all_possible_moves[l][0].slice(0, 1));
@@ -132,6 +202,16 @@ function calc_best_move() {
 
     if (origin_x > 3) {
       // 若從場外拿棋子
+      if (
+        (machine_unused_pieces[origin_y][1] === 3 && !use_size_3) ||
+        (machine_unused_pieces[origin_y][1] === 2 && !use_size_2) ||
+        (machine_unused_pieces[origin_y][1] === 1 && !use_size_1)
+      ) {
+        line_score -= 500000000;
+      } else {
+        line_score += 30000000;
+      }
+
       moving_piece = machine_unused_pieces[origin_y];
     } else {
       // 若從場上拿棋子
@@ -141,6 +221,45 @@ function calc_best_move() {
     duplicate_record[dest_x][dest_y].push(moving_piece);
 
     console.log(duplicate_record);
+
+    // 對方出了以後，只能在3子連線時去覆蓋它
+    // 若存在下面一顆棋子
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        let dest_piece_1 = duplicate_record[i][j].at(-1);
+        let dest_piece_2 = duplicate_record[i][j].at(-2);
+
+        if (dest_piece_2 != undefined) {
+          // 若蓋住的是玩家的棋子
+          if (dest_piece_2[0] === 1 - manVSMachine) {
+            if (dest_piece_1[1] === 4) {
+              if (dest_piece_1[1] - dest_piece_2[1] === 1) {
+                // 若最上面一顆棋子的大小 - 下面一顆棋子的大小 = 1
+                // 4 -> 3
+                line_score += 130000000;
+              }
+              // else {
+              //   // 若最上面一顆棋子的大小為4
+              //   // 4 -> 2 ： + 20
+              //   // 4 -> 1 ： + 10
+              //   line_score += 10 * (4 - (dest_piece_1[1] - dest_piece_2[1]));
+              // }
+            } else {
+              // 若最上面一顆棋子的大小不為4
+              if (dest_piece_1[1] - dest_piece_2[1] === 1) {
+                // 若最上面一顆棋子的大小 - 下面一顆棋子的大小 = 1
+                // 2 -> 1 or 3 -> 2
+                line_score += 20000000;
+              } else if (dest_piece_1[1] - dest_piece_2[1] === 2) {
+                // 若最上面一顆棋子的大小 - 下面一顆棋子的大小 = 2
+                // 3 -> 1
+                line_score += 10000000;
+              }
+            }
+          }
+        }
+      }
+    }
 
     let all_lines = get_all_lines(duplicate_record);
 
@@ -190,7 +309,6 @@ function calc_best_move() {
 
     // 將此落子處的總積分和當前最高積分比較，若較高，則更新之，並記錄i
     if (
-      l === 0 ||
       line_score > highest_score[0] ||
       (line_score === highest_score[0] && Math.random() < 0.1)
     ) {
@@ -291,7 +409,7 @@ function calc_line_score(
           if (
             player_free_pieces_out_of_line[i][j][1] > record[manVSMachine][0]
           ) {
-            score -= 900000000;
+            score -= 1000000000;
             already_minus = true;
             break loop1;
           }
@@ -309,7 +427,7 @@ function calc_line_score(
           player_unused_pieces[i][1] > record[manVSMachine][0] &&
           if_N_pieces_in_line(3, duplicate_record)[manVSMachine] !== -1
         ) {
-          score -= 900000000;
+          score -= 1000000000;
           break loop1;
         }
       }
@@ -358,7 +476,7 @@ function calc_line_score(
             machine_free_pieces_out_of_line[i][j][1] >
             record[1 - manVSMachine][0]
           ) {
-            score += 90000000;
+            score += 100000000;
             already_plus = true;
             break loop1;
           }
@@ -376,7 +494,7 @@ function calc_line_score(
           machine_unused_pieces[i][1] > record[1 - manVSMachine][0] &&
           if_N_pieces_in_line(3, duplicate_record)[1 - manVSMachine] !== -1
         ) {
-          score += 90000000;
+          score += 100000000;
           break loop1;
         }
       }
@@ -403,7 +521,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[manVSMachine]) === -1
   ) {
-    score -= 9000000;
+    score -= 10000000;
   }
 
   if (
@@ -411,7 +529,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[manVSMachine]) === -1
   ) {
-    score -= 8000000;
+    score -= 10000000;
   }
 
   if (
@@ -426,7 +544,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[1 - manVSMachine]) === -1
   ) {
-    score += 900000;
+    score += 1000000;
   }
 
   if (
@@ -434,7 +552,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[1 - manVSMachine]) === -1
   ) {
-    score += 800000;
+    score += 1000000;
   }
 
   if (
@@ -449,7 +567,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[manVSMachine]) === -1
   ) {
-    score -= 90000;
+    score -= 100000;
   }
 
   if (
@@ -457,7 +575,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[manVSMachine]) === -1
   ) {
-    score -= 80000;
+    score -= 100000;
   }
 
   if (
@@ -472,7 +590,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[1 - manVSMachine]) === -1
   ) {
-    score += 9000;
+    score += 10000;
   }
 
   if (
@@ -480,7 +598,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[1 - manVSMachine]) === -1
   ) {
-    score += 8000;
+    score += 10000;
   }
 
   if (
@@ -496,7 +614,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[manVSMachine]) !== -1
   ) {
-    score -= 900;
+    score -= 1000;
   }
 
   if (
@@ -504,7 +622,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[manVSMachine]) !== -1
   ) {
-    score -= 800;
+    score -= 1000;
   }
 
   if (
@@ -512,7 +630,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[manVSMachine]) !== -1
   ) {
-    score -= 700;
+    score -= 1000;
   }
 
   if (
@@ -520,7 +638,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[manVSMachine]) !== -1
   ) {
-    score -= 600;
+    score -= 1000;
   }
 
   if (
@@ -536,7 +654,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[1 - manVSMachine]) !== -1
   ) {
-    score += 90;
+    score += 100;
   }
 
   if (
@@ -544,7 +662,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[1 - manVSMachine]) !== -1
   ) {
-    score += 80;
+    score += 100;
   }
 
   if (
@@ -552,7 +670,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 1 &&
     jQuery.inArray(4, record[1 - manVSMachine]) !== -1
   ) {
-    score += 70;
+    score += 100;
   }
 
   if (
@@ -560,7 +678,7 @@ function calc_line_score(
     record[1 - manVSMachine].length === 2 &&
     jQuery.inArray(4, record[1 - manVSMachine]) !== -1
   ) {
-    score += 60;
+    score += 100;
   }
 
   return score;
@@ -1153,9 +1271,22 @@ function calc_cross_score(
 function debug_move_piece(number) {
   manVSMachine = number;
   machine_move_piece();
-  manVSMachine = -1;
+  // manVSMachine = -1;
 }
 
 function debug_change_mode(number) {
   manVSMachine = number;
 }
+
+let test_interval;
+
+function test_machine_play() {
+  test_interval = setInterval(function () {
+    machine_move_piece();
+    manVSMachine = 1 - manVSMachine;
+  }, 900);
+}
+
+$(".board").on("dblclick", function () {
+  clearInterval(test_interval);
+});
