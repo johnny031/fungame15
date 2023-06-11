@@ -222,7 +222,6 @@ function calc_best_move() {
 
     console.log(duplicate_record);
 
-    // 對方出了以後，只能在3子連線時去覆蓋它
     // 若存在下面一顆棋子
     for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 4; j++) {
@@ -1277,16 +1276,3 @@ function debug_move_piece(number) {
 function debug_change_mode(number) {
   manVSMachine = number;
 }
-
-let test_interval;
-
-function test_machine_play() {
-  test_interval = setInterval(function () {
-    machine_move_piece();
-    manVSMachine = 1 - manVSMachine;
-  }, 900);
-}
-
-$(".board").on("dblclick", function () {
-  clearInterval(test_interval);
-});
