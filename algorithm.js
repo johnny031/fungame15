@@ -1315,7 +1315,7 @@ function calc_cross_score(
         Math.max(...available_free_machine_pieces_out_of_line2) >
           weak_player_pieces2
       ) {
-        score += 150000000;
+        score += 5000000000;
         break outer_loop;
       }
 
