@@ -27,6 +27,41 @@ function calc_best_move() {
   let all_possible_moves = [];
   let if_player_has_3_pieces_in_line =
     if_N_pieces_in_line(3)[1 - manVSMachine].length !== 0;
+  let which_line_has_3_pieces = if_N_pieces_in_line(3)[1 - manVSMachine];
+  let valid_position = [];
+
+  for (let i = 0; i < which_line_has_3_pieces.length; i++) {
+    if (which_line_has_3_pieces[i] < 4) {
+      // 0,1,2,3
+      for (let j = 0; j < 4; j++) {
+        // 橫行
+        valid_position.push(
+          which_line_has_3_pieces[i].toString() + j.toString()
+        );
+      }
+    } else if (
+      which_line_has_3_pieces[i] >= 4 &&
+      which_line_has_3_pieces[i] < 8
+    ) {
+      // 4,5,6,7
+      for (let j = 0; j < 4; j++) {
+        // 直行
+        valid_position.push(
+          j.toString() + (which_line_has_3_pieces[i] - 4).toString()
+        );
+      }
+    } else if (which_line_has_3_pieces[i] === 8) {
+      for (let j = 0; j < 4; j++) {
+        // 左上右下
+        valid_position.push(j.toString() + j.toString());
+      }
+    } else if (which_line_has_3_pieces[i] === 9) {
+      for (let j = 0; j < 4; j++) {
+        // 左下右上
+        valid_position.push(j.toString() + (3 - j).toString());
+      }
+    }
+  }
 
   let machine_unused_pieces = [
     unused_pieces_record[manVSMachine][0].at(-1),
@@ -125,10 +160,13 @@ function calc_best_move() {
             machine_unused_pieces[i][1] &&
           (pieces_location_record[j][k].at(-1)[0] === manVSMachine ||
             (pieces_location_record[j][k].at(-1)[0] !== manVSMachine &&
-              if_player_has_3_pieces_in_line))
+              if_player_has_3_pieces_in_line &&
+              jQuery.inArray(j.toString() + k.toString(), valid_position) !==
+                -1))
         ) {
-          // 若所在位置(有比較小的棋子) 且
-          //    (和machine所執棋子同色 或 (和machine所執棋子不同色 且 玩家已三子連線))
+          // 若落子位置(有比較小的棋子)
+          //             且
+          // (和machine所執棋子同色 或 (和machine所執棋子不同色 且 玩家已三子連線 且 落子位置在玩家三子連線上))
 
           all_possible_moves.push([
             (manVSMachine + 4).toString() + i.toString(),
@@ -145,12 +183,12 @@ function calc_best_move() {
 
   let lines_record = get_all_lines_record(lines);
 
-  // true: 取得machine的自由棋子
+  // 取得machine的自由棋子
   let machine_free_pieces = get_free_pieces(
     lines,
     lines_record,
     duplicate_record,
-    true
+    manVSMachine
   );
 
   // console.log(machine_free_pieces);
@@ -274,20 +312,20 @@ function calc_best_move() {
 
     let all_lines_record = get_all_lines_record(all_lines);
 
-    // true: 取得machine的自由棋子
+    // 取得machine的自由棋子
     let machine_free_pieces = get_free_pieces(
       all_lines,
       all_lines_record,
       duplicate_record,
-      true
+      manVSMachine
     );
 
-    // false: 取得player的自由棋子
+    // 取得player的自由棋子
     let player_free_pieces = get_free_pieces(
       all_lines,
       all_lines_record,
       duplicate_record,
-      false
+      1 - manVSMachine
     );
 
     // 逐一檢查棋盤上所有可能連線
@@ -473,6 +511,7 @@ function calc_line_score(
       }
     }
 
+    // 若玩家在場外有比這3子連線的棋子還大的棋子，不加分
     loop2: for (let i = 0; i < 3; i++) {
       if (player_unused_pieces[i] == undefined) continue loop2;
 
@@ -715,7 +754,7 @@ function get_free_pieces(
   all_lines,
   all_lines_record,
   duplicate_record,
-  manOrMachine // true: 取得machine的自由棋子, false: 取得man的自由棋子
+  black_or_white
 ) {
   // 逐一檢查棋盤上所有可能連線
   let free_pieces = [[], [], [], []];
@@ -725,17 +764,17 @@ function get_free_pieces(
     let who_has_one_only = -1; // -1:該線上所有棋子均自由
 
     if (
-      all_lines_record[i][manVSMachine].length === 1 &&
-      all_lines_record[i][1 - manVSMachine].length === 3
+      all_lines_record[i][1].length === 1 &&
+      all_lines_record[i][0].length === 3
     ) {
       // machine方棋子數量為1，player方棋子數量為3
-      who_has_one_only = manVSMachine;
+      who_has_one_only = 1;
     } else if (
-      all_lines_record[i][manVSMachine].length === 3 &&
-      all_lines_record[i][1 - manVSMachine].length === 1
+      all_lines_record[i][1].length === 3 &&
+      all_lines_record[i][0].length === 1
     ) {
       // machine方棋子數量為3，player方棋子數量為1
-      who_has_one_only = 1 - manVSMachine;
+      who_has_one_only = 0;
     }
 
     for (let k = 0; k < 4; k++) {
@@ -779,18 +818,11 @@ function get_free_pieces(
   }
   // console.log(free_pieces);
 
-  let wanted_color = manVSMachine;
-
-  if (manOrMachine) {
-    //  true: 取得machine方的自由棋子, false: 取得player方的自由棋子
-    wanted_color = 1 - manVSMachine;
-  }
-
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       if (
         free_pieces[i][j].length !== 0 &&
-        free_pieces[i][j][0] === wanted_color
+        free_pieces[i][j][0] === 1 - black_or_white
       ) {
         free_pieces[i][j].length = 0;
       }
@@ -1122,7 +1154,7 @@ function calc_cross_score(
         }
 
         if (minus_score) {
-          score -= 150000000;
+          score -= 230000000;
           break outer_loop;
         }
       }

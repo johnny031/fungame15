@@ -21,7 +21,8 @@ body {
   position: relative;
 }
 
-.container {
+.container,
+.container-in-tutorial {
   --piece-section-length: 70vmin;
   --piece-section-width: 22vmin;
   /* --piece-section-width: calc((100vmax - var(--piece-section-length)) / 2 - 2vmin); */
@@ -31,6 +32,16 @@ body {
   align-items: center;
   gap: 2vmin;
   transform: rotate(calc(0deg - var(--board-rotate)));
+}
+
+.container-in-tutorial {
+  --piece-section-length: 30vmin;
+  --piece-section-width: 9vmin;
+  pointer-events: none;
+}
+
+.selected-piece-in-tutorial {
+  box-shadow: 0px 0px 2vmin rgb(255, 0, 204);
 }
 
 .board {
@@ -160,6 +171,8 @@ body {
   padding: 4vmin 5vmin;
   border-radius: 3vmin;
   z-index: 1;
+  max-height: 65vmax;
+  overflow-y: auto;
 }
 
 .setting-div h1 {
@@ -177,7 +190,6 @@ body {
 }
 
 .tutorial-div {
-  display: none;
   margin: 1.1em 0 0.5em auto;
   float: right;
 }
@@ -185,11 +197,29 @@ body {
 .tutorial-btn {
   font-size: 3.5vmin;
   cursor: pointer;
-  color: rgb(125, 69, 69);
+  color: rgba(147, 74, 74, 0.9);
+}
+
+.back-btn {
+  cursor: pointer;
+  font-size: 3.5vmin;
+}
+
+.rule-list {
+  margin: 0 1em 0.5em 1.8em;
+  font-size: 3.5vmin;
+}
+
+.rule-list li {
+  margin: 1em 0;
+}
+
+.container-in-tutorial {
+  margin-bottom: 3rem;
 }
 
 .tutorial-btn:hover {
-  color: rgb(159, 118, 118);
+  color: rgba(147, 74, 74, 0.6);
 }
 
 .tutorial-content {

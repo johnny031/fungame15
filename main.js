@@ -244,8 +244,6 @@ function check_if_win() {
           render_board();
         } else {
           cancel = true;
-          ///remember
-          clearInterval(interval_test);
         }
       } else {
         if_4_pieces_in_line_black && alert("黑方獲勝!");
@@ -255,8 +253,6 @@ function check_if_win() {
           render_board();
         } else {
           cancel = true;
-          ///remember
-          clearInterval(interval_test);
         }
       }
     }
@@ -346,6 +342,8 @@ function render_board() {
   ];
 
   $(".container").empty();
+  $(".container-in-tutorial").empty();
+
   $(".container").append(`
     <span class="setting-section">
       <a class="btn retract-btn disabled"><i class="fas fa-undo-alt"></i>悔棋</a> 
@@ -429,6 +427,67 @@ function render_board() {
     </span>
     `);
 
+  $(".container-in-tutorial").append(`
+    <div class="piece-section">
+      <div class="piece-stack">
+        <div class="piece" data-color="1" data-size="1"></div>
+        <div class="piece" data-color="1" data-size="2"></div>
+        <div class="piece" data-color="1" data-size="3"></div>
+        <div class="piece" data-color="1" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-color="1" data-size="1"></div>
+        <div class="piece" data-color="1" data-size="2"></div>
+        <div class="piece" data-color="1" data-size="3"></div>
+        <div class="piece" data-color="1" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-color="1" data-size="1"></div>
+        <div class="piece" data-color="1" data-size="2"></div>
+        <div class="piece" data-color="1" data-size="3"></div>
+        <div class="piece" data-color="1" data-size="4"></div>
+      </div>
+    </div>
+    <div class="board">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>   
+    <div class="piece-section">
+      <div class="piece-stack">
+        <div class="piece" data-color="0" data-size="1"></div>
+        <div class="piece" data-color="0" data-size="2"></div>
+        <div class="piece" data-color="0" data-size="3"></div>
+        <div class="piece" data-color="0" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-color="0" data-size="1"></div>
+        <div class="piece" data-color="0" data-size="2"></div>
+        <div class="piece" data-color="0" data-size="3"></div>
+        <div class="piece" data-color="0" data-size="4"></div>
+      </div>
+      <div class="piece-stack">
+        <div class="piece" data-color="0" data-size="1"></div>
+        <div class="piece" data-color="0" data-size="2"></div>
+        <div class="piece" data-color="0" data-size="3"></div>
+        <div class="piece" data-color="0" data-size="4"></div>
+      </div>
+    </div>
+    `);
+
   if (manVSMachine === -1) {
     // 雙人對戰
     $(".container").attr("style", "--board-rotate: 0deg");
@@ -484,6 +543,43 @@ $(document).on("click", ".piece", function (event) {
     return false;
   }
 
+  let which_line_has_3_pieces = if_N_pieces_in_line(3)[1 - round];
+  let dest_piece_position = $(this).parent(".cell").attr("data-position");
+  let valid_position = [];
+
+  for (let i = 0; i < which_line_has_3_pieces.length; i++) {
+    if (which_line_has_3_pieces[i] < 4) {
+      // 0,1,2,3
+      for (let j = 0; j < 4; j++) {
+        // 橫行
+        valid_position.push(
+          which_line_has_3_pieces[i].toString() + j.toString()
+        );
+      }
+    } else if (
+      which_line_has_3_pieces[i] >= 4 &&
+      which_line_has_3_pieces[i] < 8
+    ) {
+      // 4,5,6,7
+      for (let j = 0; j < 4; j++) {
+        // 直行
+        valid_position.push(
+          j.toString() + (which_line_has_3_pieces[i] - 4).toString()
+        );
+      }
+    } else if (which_line_has_3_pieces[i] === 8) {
+      for (let j = 0; j < 4; j++) {
+        // 左上右下
+        valid_position.push(j.toString() + j.toString());
+      }
+    } else if (which_line_has_3_pieces[i] === 9) {
+      for (let j = 0; j < 4; j++) {
+        // 左下右上
+        valid_position.push(j.toString() + (3 - j).toString());
+      }
+    }
+  }
+
   // 若目前有已選擇的棋子，且點選的棋子在場內
   if (select && $(this).attr("data-used") === "1") {
     if (
@@ -491,9 +587,15 @@ $(document).on("click", ".piece", function (event) {
         parseInt($(this).attr("data-size")) ||
       (parseInt($(this).attr("data-color")) === 1 - round &&
         $(".selected").attr("data-used") === "0" &&
-        if_N_pieces_in_line(3)[1 - round].length === 0)
+        if_N_pieces_in_line(3)[1 - round].length === 0) ||
+      (parseInt($(this).attr("data-color")) === 1 - round &&
+        $(".selected").attr("data-used") === "0" &&
+        if_N_pieces_in_line(3)[1 - round].length !== 0 &&
+        jQuery.inArray(dest_piece_position, valid_position) === -1)
     ) {
-      // 如果行動棋子比目標棋子小，或(從場外拿棋子欲蓋住對方棋子時，對方尚未3子連線)
+      // 如果行動棋子比目標棋子小，
+      // 或 (從場外拿棋子欲蓋住對方棋子時，對方尚未3子連線)
+      // 或 (從場外拿棋子欲蓋住對方棋子時，對方已3子連線，但目標棋子並非在此連線上)
       return false;
     }
     move_piece($(this).parent(".cell"));
@@ -612,6 +714,8 @@ $(document).on("click", ".setting-btn", function () {
 
 $(document).on("click", ".overlay", function () {
   $(".setting-div, .overlay").hide();
+  $(".tutorial-content").hide();
+  $(".setting-content").show();
 
   if (if_setting_changed) {
     if (manVSMachine === 1) {
@@ -719,5 +823,260 @@ function if_N_pieces_in_line(number, pieces_location = pieces_location_record) {
 }
 
 $(".tutorial-btn").on("click", function () {
-  // alert("123");
+  $(".tutorial-content").show();
+  $(".setting-content").hide();
+  tutor_animation_1();
+  tutor_animation_2();
+  tutor_animation_3();
+  tutor_animation_4();
+  tutor_animation_5();
+  tutor_animation_6();
 });
+
+$(".back-btn").on("click", function () {
+  $(".tutorial-content").hide();
+  $(".setting-content").show();
+});
+
+function tutor_animation_1() {
+  let piece = $(
+    ".container-in-tutorial.first .piece-section:last-of-type .piece-stack:last-of-type .piece[data-color='0'][data-size='4']"
+  );
+
+  let origin_cell = $(
+    ".container-in-tutorial.first .piece-section:last-of-type .piece-stack:last-of-type"
+  );
+  let dest_cell = $(
+    ".container-in-tutorial.first .board .cell:nth-last-of-type(6)"
+  );
+
+  piece.addClass("selected-piece-in-tutorial");
+
+  setTimeout(() => {
+    piece.detach().appendTo(dest_cell);
+    piece.removeClass("selected-piece-in-tutorial");
+  }, 800);
+
+  setTimeout(function () {
+    piece.detach().appendTo(origin_cell);
+    tutor_animation_1();
+  }, 2200);
+}
+
+function tutor_animation_2() {
+  let piece2 = $(
+    ".container-in-tutorial.second .piece-section:last-of-type .piece-stack:nth-of-type(2) .piece[data-color='0'][data-size='3']"
+  );
+
+  let dest_cell1 = $(
+    ".container-in-tutorial.second .board .cell:nth-last-of-type(8)"
+  );
+
+  piece2.detach().appendTo(dest_cell1);
+
+  let piece = $(
+    ".container-in-tutorial.second .piece-section:last-of-type .piece-stack:last-of-type .piece[data-color='0'][data-size='4']"
+  );
+
+  let origin_cell = $(
+    ".container-in-tutorial.second .piece-section:last-of-type .piece-stack:last-of-type"
+  );
+  let dest_cell = $(
+    ".container-in-tutorial.second .board .cell:nth-last-of-type(8)"
+  );
+
+  piece.addClass("selected-piece-in-tutorial");
+
+  setTimeout(() => {
+    piece.detach().appendTo(dest_cell);
+    piece.removeClass("selected-piece-in-tutorial");
+  }, 800);
+
+  setTimeout(function () {
+    piece.detach().appendTo(origin_cell);
+    tutor_animation_2();
+  }, 2200);
+}
+
+function tutor_animation_3() {
+  let piece1 = $(
+    ".container-in-tutorial.third .piece-section:last-of-type .piece-stack:last-of-type .piece[data-color='0'][data-size='4']"
+  );
+
+  let piece = $(
+    ".container-in-tutorial.third .board .cell:nth-last-of-type(7) .piece"
+  );
+
+  let origin_cell = $(
+    ".container-in-tutorial.third .board .cell:nth-last-of-type(7)"
+  );
+
+  piece1.detach().appendTo(origin_cell);
+
+  let dest_cell = $(
+    ".container-in-tutorial.third .board .cell:nth-last-of-type(5)"
+  );
+
+  piece.addClass("selected-piece-in-tutorial");
+
+  setTimeout(() => {
+    piece.detach().appendTo(dest_cell);
+    piece.removeClass("selected-piece-in-tutorial");
+  }, 800);
+
+  setTimeout(function () {
+    piece.detach().appendTo(origin_cell);
+    tutor_animation_3();
+  }, 2200);
+}
+
+function tutor_animation_4() {
+  let piece1 = $(
+    ".container-in-tutorial.fourth .piece-section:last-of-type .piece-stack:last-of-type .piece[data-color='0'][data-size='4']"
+  );
+
+  let piece2 = $(
+    ".container-in-tutorial.fourth .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='3']"
+  );
+
+  let piece = $(
+    ".container-in-tutorial.fourth .board .cell:nth-last-of-type(12) .piece"
+  );
+
+  let origin_cell = $(
+    ".container-in-tutorial.fourth .board .cell:nth-last-of-type(12)"
+  );
+
+  piece1.detach().appendTo(origin_cell);
+
+  let dest_cell = $(
+    ".container-in-tutorial.fourth .board .cell:nth-last-of-type(6)"
+  );
+
+  piece2.detach().appendTo(dest_cell);
+
+  piece.addClass("selected-piece-in-tutorial");
+
+  setTimeout(() => {
+    piece.detach().appendTo(dest_cell);
+    piece.removeClass("selected-piece-in-tutorial");
+  }, 800);
+
+  setTimeout(function () {
+    piece.detach().appendTo(origin_cell);
+    tutor_animation_4();
+  }, 2200);
+}
+
+function tutor_animation_5() {
+  let piece3 = $(
+    ".container-in-tutorial.fifth .piece-section:first-of-type .piece-stack:nth-of-type(2) .piece[data-color='1'][data-size='3']"
+  );
+  let piece4 = $(
+    ".container-in-tutorial.fifth .piece-section:first-of-type .piece-stack:nth-of-type(2) .piece[data-color='1'][data-size='4']"
+  );
+  let piece2 = $(
+    ".container-in-tutorial.fifth .piece-section:first-of-type .piece-stack:nth-of-type(2) .piece[data-color='1'][data-size='2']"
+  );
+
+  let dest_cell1 = $(
+    ".container-in-tutorial.fifth .board .cell:nth-last-of-type(7)"
+  );
+
+  let dest_cell2 = $(
+    ".container-in-tutorial.fifth .board .cell:nth-last-of-type(11)"
+  );
+
+  let dest_cell3 = $(
+    ".container-in-tutorial.fifth .board .cell:nth-last-of-type(15)"
+  );
+
+  piece2.detach().appendTo(dest_cell1);
+  piece3.detach().appendTo(dest_cell2);
+  piece4.detach().appendTo(dest_cell3);
+
+  let piece = $(
+    ".container-in-tutorial.fifth .piece-section:last-of-type .piece-stack:last-of-type .piece[data-color='0'][data-size='4']"
+  );
+
+  let origin_cell = $(
+    ".container-in-tutorial.fifth .piece-section:last-of-type .piece-stack:last-of-type"
+  );
+  let dest_cell = $(
+    ".container-in-tutorial.fifth .board .cell:nth-last-of-type(7)"
+  );
+
+  piece.addClass("selected-piece-in-tutorial");
+
+  setTimeout(() => {
+    piece.detach().appendTo(dest_cell);
+    piece.removeClass("selected-piece-in-tutorial");
+  }, 800);
+
+  setTimeout(function () {
+    piece.detach().appendTo(origin_cell);
+    tutor_animation_5();
+  }, 2200);
+}
+
+function tutor_animation_6() {
+  let piece1 = $(
+    ".container-in-tutorial.sixth .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='3']"
+  );
+
+  let piece2 = $(
+    ".container-in-tutorial.sixth .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='4']"
+  );
+
+  let piece3 = $(
+    ".container-in-tutorial.sixth .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='1']"
+  );
+
+  let piece4 = $(
+    ".container-in-tutorial.sixth .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='2']"
+  );
+
+  let piece0 = $(
+    ".container-in-tutorial.sixth .piece-section:last-of-type .piece-stack:last-of-type .piece[data-color='0'][data-size='4']"
+  );
+
+  let piece = $(
+    ".container-in-tutorial.sixth .board .cell:nth-last-of-type(12) .piece[data-color='0'][data-size='4']"
+  );
+
+  let cell1 = $(
+    ".container-in-tutorial.sixth .board .cell:nth-last-of-type(11)"
+  );
+  let cell2 = $(
+    ".container-in-tutorial.sixth .board .cell:nth-last-of-type(10)"
+  );
+
+  let cell3 = $(
+    ".container-in-tutorial.sixth .board .cell:nth-last-of-type(9)"
+  );
+
+  let origin_cell = $(
+    ".container-in-tutorial.sixth .board .cell:nth-last-of-type(12)"
+  );
+
+  let dest_cell = $(
+    ".container-in-tutorial.sixth .board .cell:nth-last-of-type(2)"
+  );
+
+  piece1.detach().appendTo(origin_cell);
+  piece2.detach().appendTo(cell1);
+  piece3.detach().appendTo(cell2);
+  piece4.detach().appendTo(cell3);
+  piece0.detach().appendTo(origin_cell);
+  piece.addClass("selected-piece-in-tutorial");
+
+  setTimeout(() => {
+    piece.detach().appendTo(dest_cell);
+    piece.removeClass("selected-piece-in-tutorial");
+  }, 800);
+
+  setTimeout(function () {
+    piece.detach().appendTo(origin_cell);
+    tutor_animation_6();
+  }, 2200);
+}
