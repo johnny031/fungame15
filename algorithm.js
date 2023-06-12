@@ -228,7 +228,7 @@ function calc_best_move() {
     if (origin_x > 3 && dest_piece_second_to_last != undefined) {
       // 且蓋住的是玩家的棋子
       if (dest_piece_second_to_last[0] === 1 - manVSMachine) {
-        line_score += 300000000;
+        line_score += 400000000;
       }
     }
 
@@ -473,6 +473,15 @@ function calc_line_score(
       }
     }
 
+    loop2: for (let i = 0; i < 3; i++) {
+      if (player_unused_pieces[i] == undefined) continue loop2;
+
+      if (player_unused_pieces[i][1] > Math.min(...record[manVSMachine])) {
+        score -= 100000000;
+        break loop2;
+      }
+    }
+
     // 目前得到所有不在此線段的machine方自由棋子: machine_free_pieces_out_of_line
 
     // 若其中有size比此線段player方棋子大的，才加分
@@ -515,6 +524,15 @@ function calc_line_score(
     record[manVSMachine].length === 3 &&
     record[1 - manVSMachine].length === 0
   ) {
+    loop1: for (let i = 0; i < 3; i++) {
+      if (player_unused_pieces[i] == undefined) continue loop1;
+
+      if (player_unused_pieces[i][1] > Math.min(...record[manVSMachine])) {
+        score -= 100000000;
+        break loop1;
+      }
+    }
+
     score += 100000000;
   }
 

@@ -717,3 +717,7 @@ function if_N_pieces_in_line(number, pieces_location = pieces_location_record) {
 
   return result;
 }
+
+$(".tutorial-btn").on("click", function () {
+  // alert("123");
+});

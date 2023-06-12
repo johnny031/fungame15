@@ -176,6 +176,26 @@ body {
   font-size: 4vmin;
 }
 
+.tutorial-div {
+  display: none;
+  margin: 1.1em 0 0.5em auto;
+  float: right;
+}
+
+.tutorial-btn {
+  font-size: 3.5vmin;
+  cursor: pointer;
+  color: rgb(125, 69, 69);
+}
+
+.tutorial-btn:hover {
+  color: rgb(159, 118, 118);
+}
+
+.tutorial-content {
+  display:none;
+}
+
 .subtitle {
   text-shadow: 0px 0px 5px rgb(198, 198, 198);
   word-break: keep-all;

@@ -1,60 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"
+      integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>fungame15</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"
-    integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
-  <link rel="stylesheet" type="text/css" href="style.css" />
-  <title>fungame15</title>
-</head>
+  <body>
+    <div class="container"></div>
 
-<body>
-  <div class="container"></div>
-  <div class="setting-div">
-    <h1>設定</h1>
-    <div class="row">
-      <div class="subtitle">對戰模式</div>
-      <label class="input-container" for="manVSman">雙人
-        <input type="radio" id="manVSman" name="mode" value="0" checked="checked"> 
-        <span class="checkmark"></span>
-      </label>
-      <label class="input-container" for="manVSmachine">單機
-        <input type="radio" id="manVSmachine" name="mode" value="1">
-        <span class="checkmark"></span>
-      </label>
-    </div>
-    
-    <div class="row select-color-section" style="display:none;">
-      <div class="subtitle">選擇顏色</div>
-      <label class="input-container" for="white">白色
-        <input type="radio" id="white" name="color" value="0">
-        <span class="checkmark"></span>
-      </label>
-      <label class="input-container" for="black">黑色
-        <input type="radio" id="black" name="color" value="1">
-        <span class="checkmark"></span>
-      </label>
-    </div>
+    <div class="setting-div">
+      <div class="setting-content">
+        <h1>設定</h1>
+        <div class="row">
+          <div class="subtitle">對戰模式</div>
+          <label class="input-container" for="manVSman"
+            >雙人
+            <input
+              type="radio"
+              id="manVSman"
+              name="mode"
+              value="0"
+              checked="checked"
+            />
+            <span class="checkmark"></span>
+          </label>
+          <label class="input-container" for="manVSmachine"
+            >單機
+            <input type="radio" id="manVSmachine" name="mode" value="1" />
+            <span class="checkmark"></span>
+          </label>
+        </div>
 
-    <div class="row">
-      <div class="subtitle">限制時間</div>
-      <div>
-        <span>關</span>
-        <label class="switch">
-          <input type="checkbox" id="timer-checkbox">
-          <span class="slider round"></span>
-        </label>
-        <span>開</span>
+        <div class="row select-color-section" style="display: none">
+          <div class="subtitle">選擇顏色</div>
+          <label class="input-container" for="white"
+            >白色
+            <input type="radio" id="white" name="color" value="0" />
+            <span class="checkmark"></span>
+          </label>
+          <label class="input-container" for="black"
+            >黑色
+            <input type="radio" id="black" name="color" value="1" />
+            <span class="checkmark"></span>
+          </label>
+        </div>
+
+        <div class="row">
+          <div class="subtitle">限制時間</div>
+          <div>
+            <span>關</span>
+            <label class="switch">
+              <input type="checkbox" id="timer-checkbox" />
+              <span class="slider round"></span>
+            </label>
+            <span>開</span>
+          </div>
+        </div>
+        <div class="tutorial-div">
+          <a class="tutorial-btn"><i class="fas fa-book"></i>規則介紹</a>
+        </div>
       </div>
-    </div> 
-  </div>
-  <div class="overlay"></div>
-</body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="main.js"></script>
-<script src="algorithm.js"></script>
+      <div class="tutorial-content">
+        <h1>規則</h1>
+      </div>
+    </div>
 
+    <div class="overlay"></div>
+  </body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="main.js"></script>
+  <script src="algorithm.js"></script>
 </html>
