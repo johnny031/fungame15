@@ -177,31 +177,14 @@ function calc_best_move() {
     }
   }
 
-  let duplicate_record = JSON.parse(JSON.stringify(pieces_location_record));
-
-  let lines = get_all_lines(duplicate_record);
-
-  let lines_record = get_all_lines_record(lines);
-
-  // 取得machine的自由棋子
-  let machine_free_pieces = get_free_pieces(
-    lines,
-    lines_record,
-    duplicate_record,
-    manVSMachine
-  );
-
   // console.log(machine_free_pieces);
 
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       if (pieces_location_record[i][j].length === 0) continue;
 
-      if (
-        pieces_location_record[i][j].at(-1)[0] === manVSMachine &&
-        machine_free_pieces[i][j].length !== 0
-      ) {
-        // 若該子屬於machine持方，且為自由棋子，則可以選擇作為起手子
+      if (pieces_location_record[i][j].at(-1)[0] === manVSMachine) {
+        // 若該子屬於machine持方，則可以選擇作為起手子
         for (let k = 0; k < 4; k++) {
           for (let l = 0; l < 4; l++) {
             if (k === i && l === j) continue;
@@ -245,9 +228,7 @@ function calc_best_move() {
         (machine_unused_pieces[origin_y][1] === 2 && !use_size_2) ||
         (machine_unused_pieces[origin_y][1] === 1 && !use_size_1)
       ) {
-        line_score -= 300000000;
-      } else {
-        line_score += 30000000;
+        line_score -= 500000000;
       }
 
       moving_piece = machine_unused_pieces[origin_y];
@@ -263,10 +244,13 @@ function calc_best_move() {
     let dest_piece_second_to_last = duplicate_record[dest_x][dest_y].at(-2);
 
     // 若從場外拿棋子
-    if (origin_x > 3 && dest_piece_second_to_last != undefined) {
-      // 且蓋住的是玩家的棋子
-      if (dest_piece_second_to_last[0] === 1 - manVSMachine) {
-        line_score += 400000000;
+    if (origin_x > 3) {
+      if (dest_piece_second_to_last == undefined) {
+        // 且放到空格上
+        line_score += 200000000;
+      } else if (dest_piece_second_to_last[0] === 1 - manVSMachine) {
+        // 且蓋住的是玩家的棋子
+        line_score += 500000000;
       }
     }
 
@@ -283,7 +267,7 @@ function calc_best_move() {
               if (dest_piece_1[1] - dest_piece_2[1] === 1) {
                 // 若最上面一顆棋子的大小 - 下面一顆棋子的大小 = 1
                 // 4 -> 3
-                line_score += 130000000;
+                line_score += 30000000;
               }
               // else {
               //   // 若最上面一顆棋子的大小為4
@@ -399,12 +383,12 @@ function calc_line_score(
 
   // machine方棋子數量為4
   if (record[manVSMachine].length === 4) {
-    score += 5000000000;
+    score += 500000000000;
   }
 
   // player方棋子數量為4
   if (record[1 - manVSMachine].length === 4) {
-    score -= 5000000000;
+    score -= 500000000000;
   }
 
   // machine方棋子數量為0，且player方棋子數量為3
@@ -412,7 +396,7 @@ function calc_line_score(
     record[manVSMachine].length === 0 &&
     record[1 - manVSMachine].length === 3
   ) {
-    score -= 1000000000;
+    score -= 10000000000;
   }
 
   // machine方棋子數量為1，player方棋子數量為3
@@ -456,7 +440,7 @@ function calc_line_score(
           if (
             player_free_pieces_out_of_line[i][j][1] > record[manVSMachine][0]
           ) {
-            score -= 1000000000;
+            score -= 10000000000;
             already_minus = true;
             break loop1;
           }
@@ -474,7 +458,7 @@ function calc_line_score(
           player_unused_pieces[i][1] > record[manVSMachine][0] &&
           if_N_pieces_in_line(3, duplicate_record)[manVSMachine] !== -1
         ) {
-          score -= 1000000000;
+          score -= 10000000000;
           break loop1;
         }
       }
@@ -1315,7 +1299,7 @@ function calc_cross_score(
         Math.max(...available_free_machine_pieces_out_of_line2) >
           weak_player_pieces2
       ) {
-        score += 5000000000;
+        score += 500000000;
         break outer_loop;
       }
 
