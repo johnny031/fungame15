@@ -228,7 +228,7 @@ function calc_best_move() {
         (machine_unused_pieces[origin_y][1] === 2 && !use_size_2) ||
         (machine_unused_pieces[origin_y][1] === 1 && !use_size_1)
       ) {
-        line_score -= 500000000;
+        // line_score -= 500000000;
       }
 
       moving_piece = machine_unused_pieces[origin_y];
@@ -247,7 +247,7 @@ function calc_best_move() {
     if (origin_x > 3) {
       if (dest_piece_second_to_last == undefined) {
         // 且放到空格上
-        line_score += 200000000;
+        line_score += 30000000;
       } else if (dest_piece_second_to_last[0] === 1 - manVSMachine) {
         // 且蓋住的是玩家的棋子
         line_score += 500000000;
@@ -373,7 +373,7 @@ function calc_line_score(
   // 落子後
   // 加上machine方棋子size
   for (let i = 0; i < record[manVSMachine].length; i++) {
-    score += record[manVSMachine][i];
+    score += 5 - record[manVSMachine][i];
   }
 
   // 扣掉player方棋子size
@@ -456,7 +456,7 @@ function calc_line_score(
 
         if (
           player_unused_pieces[i][1] > record[manVSMachine][0] &&
-          if_N_pieces_in_line(3, duplicate_record)[manVSMachine] !== -1
+          if_N_pieces_in_line(3, duplicate_record)[manVSMachine].length !== 0
         ) {
           score -= 10000000000;
           break loop1;
@@ -527,13 +527,23 @@ function calc_line_score(
 
     // 如果還沒加過3000分的話
     if (!already_plus) {
-      // 若machine場外有棋子更大，且player方已三子連線
       loop1: for (let i = 0; i < 3; i++) {
         if (machine_unused_pieces[i] == undefined) continue loop1;
-
+        // 若machine場外有棋子更大，且player方尚未三子連線
         if (
           machine_unused_pieces[i][1] > record[1 - manVSMachine][0] &&
-          if_N_pieces_in_line(3, duplicate_record)[1 - manVSMachine] !== -1
+          if_N_pieces_in_line(3, duplicate_record)[1 - manVSMachine].length ===
+            0
+        ) {
+          // 把場外大子拿進來，放在同一個空位
+          score -= 4;
+        }
+
+        // 若machine場外有棋子更大，且player方已三子連線
+        if (
+          machine_unused_pieces[i][1] > record[1 - manVSMachine][0] &&
+          if_N_pieces_in_line(3, duplicate_record)[1 - manVSMachine].length !==
+            0
         ) {
           score += 100000000;
           break loop1;

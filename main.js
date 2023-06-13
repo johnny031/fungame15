@@ -789,6 +789,7 @@ $(".tutorial-btn").on("click", function () {
   tutor_animation_4();
   tutor_animation_5();
   tutor_animation_6();
+  tutor_animation_7();
 });
 
 $(".back-btn").on("click", function () {
@@ -1017,14 +1018,103 @@ function tutor_animation_6() {
     ".container-in-tutorial.sixth .board .cell:nth-last-of-type(12)"
   );
 
+  piece1.detach().appendTo(origin_cell);
+  piece2.detach().appendTo(cell1);
+  piece3.detach().appendTo(cell2);
+  piece4.detach().appendTo(cell3);
+  piece0.detach().appendTo(origin_cell);
+  piece.addClass("selected-piece-in-tutorial");
+
+  setTimeout(() => {
+    piece.detach().appendTo(cell3);
+    piece.removeClass("selected-piece-in-tutorial");
+  }, 800);
+
+  setTimeout(function () {
+    piece.detach().appendTo(origin_cell);
+    tutor_animation_6();
+  }, 2200);
+}
+
+function tutor_animation_7() {
+  let piece1 = $(
+    ".container-in-tutorial.seventh .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='3']"
+  );
+
+  let piece2 = $(
+    ".container-in-tutorial.seventh .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='4']"
+  );
+
+  let piece3 = $(
+    ".container-in-tutorial.seventh .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='1']"
+  );
+
+  let piece8 = $(
+    ".container-in-tutorial.seventh .piece-section:first-of-type .piece-stack:first-of-type .piece[data-color='1'][data-size='3']"
+  );
+
+  let piece5 = $(
+    ".container-in-tutorial.seventh .piece-section:last-of-type .piece-stack:first-of-type .piece[data-color='0'][data-size='2']"
+  );
+
+  let piece6 = $(
+    ".container-in-tutorial.seventh .piece-section:last-of-type .piece-stack:first-of-type .piece[data-color='0'][data-size='1']"
+  );
+
+  let piece7 = $(
+    ".container-in-tutorial.seventh .piece-section:last-of-type .piece-stack:first-of-type .piece[data-color='0'][data-size='3']"
+  );
+
+  let piece4 = $(
+    ".container-in-tutorial.seventh .piece-section:first-of-type .piece-stack:last-of-type .piece[data-color='1'][data-size='2']"
+  );
+
+  let piece0 = $(
+    ".container-in-tutorial.seventh .piece-section:last-of-type .piece-stack:last-of-type .piece[data-color='0'][data-size='4']"
+  );
+
+  let piece = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(12) .piece[data-color='0'][data-size='4']"
+  );
+
+  let cell1 = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(11)"
+  );
+  let cell2 = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(10)"
+  );
+
+  let cell3 = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(9)"
+  );
+
+  let origin_cell = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(12)"
+  );
+
   let dest_cell = $(
-    ".container-in-tutorial.sixth .board .cell:nth-last-of-type(2)"
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(5)"
+  );
+
+  let cell4 = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(6)"
+  );
+  let cell5 = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(7)"
+  );
+
+  let cell6 = $(
+    ".container-in-tutorial.seventh .board .cell:nth-last-of-type(8)"
   );
 
   piece1.detach().appendTo(origin_cell);
   piece2.detach().appendTo(cell1);
   piece3.detach().appendTo(cell2);
   piece4.detach().appendTo(cell3);
+  piece5.detach().appendTo(cell4);
+  piece6.detach().appendTo(cell5);
+  piece7.detach().appendTo(cell6);
+  piece8.detach().appendTo(dest_cell);
   piece0.detach().appendTo(origin_cell);
   piece.addClass("selected-piece-in-tutorial");
 
@@ -1035,6 +1125,6 @@ function tutor_animation_6() {
 
   setTimeout(function () {
     piece.detach().appendTo(origin_cell);
-    tutor_animation_6();
+    tutor_animation_7();
   }, 2200);
 }
