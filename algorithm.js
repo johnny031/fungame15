@@ -312,6 +312,16 @@ function calc_best_move() {
       1 - manVSMachine
     );
 
+    // 取得嚴格的player的自由棋子
+    let [player_free_pieces_strict, player_unfree_pieces_record_strict] =
+      get_free_pieces(
+        all_lines,
+        all_lines_record,
+        duplicate_record,
+        1 - manVSMachine,
+        true
+      );
+
     // 逐一檢查棋盤上所有可能連線
     for (let i = 0; i < 10; i++) {
       let score = calc_line_score(
@@ -333,7 +343,9 @@ function calc_best_move() {
       duplicate_record,
       all_lines_record,
       machine_free_pieces,
-      player_free_pieces
+      player_free_pieces,
+      player_free_pieces_strict,
+      player_unfree_pieces_record_strict
     );
     line_score += score_cross;
 
@@ -908,7 +920,8 @@ function get_free_pieces(
   all_lines,
   all_lines_record,
   duplicate_record,
-  black_or_white
+  black_or_white,
+  strict = false
 ) {
   // 逐一檢查棋盤上所有可能連線
   let free_pieces = [[], [], [], []];
@@ -919,6 +932,7 @@ function get_free_pieces(
 
   for (let i = 0; i < 10; i++) {
     let who_has_one_only = -1; // -1:該線上所有棋子均自由
+    let who_has_one_only_2 = -1;
 
     if (
       all_lines_record[i][1].length === 1 &&
@@ -932,34 +946,66 @@ function get_free_pieces(
     ) {
       // 黑方棋子數量為3，白方棋子數量為1
       who_has_one_only = 0;
+    } else if (
+      all_lines_record[i][1].length === 1 &&
+      all_lines_record[i][0].length === 2
+    ) {
+      // 黑方棋子數量為1，白方棋子數量為2
+      who_has_one_only_2 = 1;
+    } else if (
+      all_lines_record[i][1].length === 2 &&
+      all_lines_record[i][0].length === 1
+    ) {
+      // 黑方棋子數量為2，白方棋子數量為1
+      who_has_one_only_2 = 0;
     }
 
     for (let k = 0; k < 4; k++) {
-      // 若有數量比為1:3的狀況 and 目前線段第k的位置數量為"1"
+      // 若嚴格，且
+      // 有數量比為1:2的狀況 且
+      // 目前線段第k的位置數量為"1" 且
+      // 底下的棋子和最上面的棋子顏色不同
+
+      // 若嚴格，且
+      // 有數量比為1:3的狀況 且
+      // 目前線段第k的位置數量為"1"
+
+      // 若不嚴格，且
+      // 有數量比為1:3的狀況 且
+      // 目前線段第k的位置數量為"1" 且
+      // 底下的棋子和最上面的棋子顏色不同
       if (
-        who_has_one_only > -1 &&
-        all_lines[i][k].at(-1)[0] === who_has_one_only
-      ) {
-        // 若此位置底下有棋子 and 此棋子的顏色和最上層不同
-        if (
+        (strict &&
+          who_has_one_only_2 > -1 &&
+          all_lines[i][k].at(-1) != undefined &&
+          all_lines[i][k].at(-1)[0] === who_has_one_only_2 &&
           all_lines[i][k].at(-2) != undefined &&
-          all_lines[i][k].at(-2)[0] !== all_lines[i][k].at(-1)[0]
-        ) {
+          all_lines[i][k].at(-2)[0] !== all_lines[i][k].at(-1)[0]) ||
+        (strict &&
+          who_has_one_only > -1 &&
+          all_lines[i][k].at(-1)[0] === who_has_one_only) ||
+        (!strict &&
+          who_has_one_only > -1 &&
+          all_lines[i][k].at(-1)[0] === who_has_one_only &&
+          all_lines[i][k].at(-2) != undefined &&
+          all_lines[i][k].at(-2)[0] !== all_lines[i][k].at(-1)[0])
+      ) {
+        if (all_lines[i][k].at(-1)[0] === black_or_white) {
           unfree_pieces_record[i] = all_lines[i][k].at(-1);
-          // 判斷為不自由棋子，並將該位置所有棋子刪除
-          if (i < 4) {
-            // i = 0,1,2,3 橫行
-            duplicate_record2[i][k].length = 0;
-          } else if (i >= 4 && i < 8) {
-            // i = 4,5,6,7 直行
-            duplicate_record2[k][i - 4].length = 0;
-          } else if (i === 8) {
-            // 左上右下
-            duplicate_record2[k][k].length = 0;
-          } else if (i === 9) {
-            // 右上左下
-            duplicate_record2[k][3 - k].length = 0;
-          }
+        }
+        // 判斷為不自由棋子，並將該位置所有棋子刪除
+        if (i < 4) {
+          // i = 0,1,2,3 橫行
+          duplicate_record2[i][k].length = 0;
+        } else if (i >= 4 && i < 8) {
+          // i = 4,5,6,7 直行
+          duplicate_record2[k][i - 4].length = 0;
+        } else if (i === 8) {
+          // 左上右下
+          duplicate_record2[k][k].length = 0;
+        } else if (i === 9) {
+          // 右上左下
+          duplicate_record2[k][3 - k].length = 0;
         }
       }
     }
@@ -1056,7 +1102,9 @@ function calc_cross_score(
   duplicate_record,
   all_lines_record,
   machine_free_pieces,
-  player_free_pieces
+  player_free_pieces,
+  player_free_pieces_strict,
+  player_unfree_pieces_record_strict
 ) {
   let score = 0;
   let line_index = [
@@ -1081,7 +1129,7 @@ function calc_cross_score(
   outer_loop: for (let i = 0; i < line_index.length; i++) {
     // 計算玩家雙活三情況所設變數
     let player_free_pieces_out_of_line = JSON.parse(
-      JSON.stringify(player_free_pieces)
+      JSON.stringify(player_free_pieces_strict)
     );
     let all_machine_free_pieces = JSON.parse(
       JSON.stringify(machine_free_pieces)
@@ -1255,6 +1303,19 @@ function calc_cross_score(
         }
       }
 
+      for (let i = 0; i < player_unfree_pieces_record_strict.length; i++) {
+        if (player_unfree_pieces_record_strict[i].length !== 0) {
+          // 線段i上有不自由的玩家棋子，且線段i經過此交叉點，則變為自由棋子
+          let coordinate_string =
+            coordinate[0].toString() + coordinate[1].toString();
+          if (check_if_cross(i, coordinate_string)) {
+            available_free_player_pieces.push(
+              player_unfree_pieces_record_strict[i][1]
+            );
+          }
+        }
+      }
+
       for (let j = 0; j < index_list.length; j++) {
         let this_line_record = all_lines_record[index_list[j]][manVSMachine];
         for (let k = 0; k < this_line_record.length; k++) {
@@ -1271,16 +1332,13 @@ function calc_cross_score(
 
       // 最大的自由的player棋子 >= 最大的自由的machine棋子 且
       // 此位置沒有棋子 或 最大的自由的player棋子比此位置的棋子大 且
-      // 兩條線內沒有size=4的machine棋子 且
-      // 最大的自由的player棋子 > 最大的位於線上的machine
+      // 兩條線內沒有size=4的machine棋子
       if (
         Math.max(...available_free_player_pieces) >=
           Math.max(...available_free_machine_pieces) &&
         (this_position_piece.length === 0 ||
           Math.max(...available_free_player_pieces) > this_position_piece[1]) &&
-        jQuery.inArray(4, weak_machine_pieces) === -1 &&
-        Math.max(...available_free_player_pieces) >
-          Math.max(...weak_machine_pieces)
+        jQuery.inArray(4, weak_machine_pieces) === -1
       ) {
         let minus_score = true;
 
@@ -1483,6 +1541,35 @@ function calc_cross_score(
   }
 
   return score;
+}
+
+function check_if_cross(line_index, coordinate) {
+  let line_position = [];
+  if (line_index < 4) {
+    // 0,1,2,3
+    for (let j = 0; j < 4; j++) {
+      // 橫行
+      line_position.push(line_index.toString() + j.toString());
+    }
+  } else if (line_index >= 4 && line_index < 8) {
+    // 4,5,6,7
+    for (let j = 0; j < 4; j++) {
+      // 直行
+      line_position.push(j.toString() + (line_index - 4).toString());
+    }
+  } else if (line_index === 8) {
+    for (let j = 0; j < 4; j++) {
+      // 左上右下
+      line_position.push(j.toString() + j.toString());
+    }
+  } else if (line_index === 9) {
+    for (let j = 0; j < 4; j++) {
+      // 左下右上
+      line_position.push(j.toString() + (3 - j).toString());
+    }
+  }
+
+  return jQuery.inArray(coordinate, line_position) !== -1;
 }
 
 function debug_move_piece(number) {
