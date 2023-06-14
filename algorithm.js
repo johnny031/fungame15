@@ -345,7 +345,9 @@ function calc_best_move() {
       machine_free_pieces,
       player_free_pieces,
       player_free_pieces_strict,
-      player_unfree_pieces_record_strict
+      player_unfree_pieces_record_strict,
+      machine_unfree_pieces_record,
+      player_unfree_pieces_record
     );
     line_score += score_cross;
 
@@ -1104,7 +1106,9 @@ function calc_cross_score(
   machine_free_pieces,
   player_free_pieces,
   player_free_pieces_strict,
-  player_unfree_pieces_record_strict
+  player_unfree_pieces_record_strict,
+  machine_unfree_pieces_record,
+  player_unfree_pieces_record
 ) {
   let score = 0;
   let line_index = [
@@ -1136,7 +1140,9 @@ function calc_cross_score(
     );
 
     // 計算我方雙活三情況所設變數
-    let all_player_free_pieces = JSON.parse(JSON.stringify(player_free_pieces));
+    let all_player_free_pieces = JSON.parse(
+      JSON.stringify(player_free_pieces_strict)
+    );
     let machine_free_pieces_out_of_line1 = JSON.parse(
       JSON.stringify(machine_free_pieces)
     );
@@ -1435,9 +1441,7 @@ function calc_cross_score(
     }
 
     if (index_list2.length >= 2) {
-      // 判斷此2條線段以外自由的player棋子能否蓋過該線段之machine棋子
-
-      // 若此線段player只有2顆棋子，player的自由棋子要扣掉此線段上的2顆
+      // 將兩線段的我方棋子從我方自由棋子中刪除
       if (index_list2[0] < 4) {
         // 0,1,2,3
         for (let j = 0; j < 4; j++) {
@@ -1491,6 +1495,8 @@ function calc_cross_score(
       let available_free_machine_pieces_out_of_line2 = [];
       let weak_player_pieces1 = 0;
       let weak_player_pieces2 = 0;
+      let player_piece1_position = "";
+      let player_piece2_position = "";
 
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
@@ -1517,12 +1523,71 @@ function calc_cross_score(
       for (let j = 0; j < index_list2.length; j++) {
         let this_line_record =
           all_lines_record[index_list2[j]][1 - manVSMachine];
-        if (this_line_record.length === 0) continue;
-
-        if (j === 0) weak_player_pieces1 = this_line_record[0];
-        if (j === 1) weak_player_pieces2 = this_line_record[0];
+        if (this_line_record.length !== 0) {
+          if (j === 0) {
+            weak_player_pieces1 = this_line_record[0];
+            // 找到這條線上，玩家棋子的座標
+            player_piece1_position = get_piece_position(
+              index_list2[j],
+              1 - manVSMachine,
+              duplicate_record
+            );
+          }
+          if (j === 1) {
+            weak_player_pieces2 = this_line_record[0];
+            // 找到這條線上，玩家棋子的座標
+            player_piece2_position = get_piece_position(
+              index_list2[j],
+              1 - manVSMachine,
+              duplicate_record
+            );
+          }
+        }
       }
 
+      for (let i = 0; i < player_unfree_pieces_record_strict.length; i++) {
+        if (player_unfree_pieces_record_strict[i].length !== 0) {
+          // 線段i上有不自由的玩家棋子，且線段i經過此交叉點，則變為自由棋子
+          let coordinate_string =
+            coordinate[0].toString() + coordinate[1].toString();
+          if (check_if_cross(i, coordinate_string)) {
+            available_all_player_free_pieces.push(
+              player_unfree_pieces_record_strict[i][1]
+            );
+          }
+        }
+      }
+
+      for (let i = 0; i < machine_unfree_pieces_record.length; i++) {
+        if (machine_unfree_pieces_record[i].length !== 0) {
+          // 線段i上有不自由的我方棋子，且線段i經過玩家棋子，則變為自由棋子
+          if (player_piece1_position.length !== 0) {
+            if (check_if_cross(i, player_piece1_position)) {
+              available_free_machine_pieces_out_of_line1.push(
+                machine_unfree_pieces_record[i][1]
+              );
+            }
+          }
+          if (player_piece2_position.length !== 0) {
+            if (check_if_cross(i, player_piece2_position)) {
+              available_free_machine_pieces_out_of_line2.push(
+                machine_unfree_pieces_record[i][1]
+              );
+            }
+          }
+        }
+      }
+
+      console.log("這裡");
+      console.log(coordinate[0].toString() + coordinate[1].toString());
+      console.log(player_piece1_position);
+      console.log(player_piece2_position);
+      console.log(available_free_machine_pieces_out_of_line1);
+      console.log(available_free_machine_pieces_out_of_line2);
+
+      // 若交叉點的我方棋子 >= 所有的玩家自由棋子
+      // 關鍵連線1: 線外的最大的我方自由棋子 大於 線上的玩家棋子
+      // 關鍵連線2: 線外的最大的我方自由棋子 大於 線上的玩家棋子
       if (
         this_position_piece[1] >=
           Math.max(...available_all_player_free_pieces) &&
@@ -1570,6 +1635,42 @@ function check_if_cross(line_index, coordinate) {
   }
 
   return jQuery.inArray(coordinate, line_position) !== -1;
+}
+
+function get_piece_position(line_index, color, duplicate_record) {
+  let piece_position = "";
+  if (line_index < 4) {
+    // 0,1,2,3
+    for (let j = 0; j < 4; j++) {
+      // 橫行
+      if (duplicate_record[line_index][j].at(-1)[0] === color) {
+        piece_position = line_index.toString() + j.toString();
+      }
+    }
+  } else if (line_index >= 4 && line_index < 8) {
+    // 4,5,6,7
+    for (let j = 0; j < 4; j++) {
+      // 直行
+      if (duplicate_record[j][line_index - 4].at(-1)[0] === color) {
+        piece_position = j.toString() + (line_index - 4).toString();
+      }
+    }
+  } else if (line_index === 8) {
+    for (let j = 0; j < 4; j++) {
+      // 左上右下
+      if (duplicate_record[j][j].at(-1)[0] === color) {
+        piece_position = j.toString() + j.toString();
+      }
+    }
+  } else if (line_index === 9) {
+    for (let j = 0; j < 4; j++) {
+      // 左下右上
+      if (duplicate_record[j][3 - j].at(-1)[0] === color) {
+        piece_position = j.toString() + (3 - j).toString();
+      }
+    }
+  }
+  return piece_position;
 }
 
 function debug_move_piece(number) {
