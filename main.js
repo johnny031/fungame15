@@ -672,6 +672,7 @@ $(document).on("click", ".overlay", function () {
   $(".setting-div, .overlay").hide();
   $(".tutorial-content").hide();
   $(".setting-content").show();
+  $(".setting-div").css("height", "auto");
 
   if (if_setting_changed) {
     if (manVSMachine === 1) {
@@ -777,6 +778,7 @@ function if_N_pieces_in_line(number, pieces_location = pieces_location_record) {
 }
 
 $(".tutorial-btn").on("click", function () {
+  $(".setting-div").css("height", "65vmax");
   $(".tutorial-content").show();
   $(".setting-content").hide();
   tutor_animation_1();
@@ -791,6 +793,7 @@ $(".tutorial-btn").on("click", function () {
 $(".back-btn").on("click", function () {
   $(".tutorial-content").hide();
   $(".setting-content").show();
+  $(".setting-div").css("height", "auto");
 });
 
 function tutor_animation_1() {
