@@ -200,22 +200,13 @@ function check_if_win() {
       //若黑白雙方均有四子連線，拿起棋子時對方已勝利
       if (if_4_pieces_in_line_white && if_4_pieces_in_line_black) {
         round === 1
-          ? alert("黑方獲勝!\n(拿起棋子時對方已經獲勝)")
-          : alert("白方獲勝!\n(拿起棋子時對方已經獲勝)");
-        if (confirm("是否重置盤面?")) {
-          render_board();
-        } else {
-          cancel = true;
-        }
+          ? win_animation(1, manVSMachine)
+          : win_animation(0, manVSMachine);
+        cancel = true;
       } else {
-        if_4_pieces_in_line_black && alert("黑方獲勝!");
-        if_4_pieces_in_line_white && alert("白方獲勝!");
-
-        if (confirm("是否重置盤面?")) {
-          render_board();
-        } else {
-          cancel = true;
-        }
+        if_4_pieces_in_line_black && win_animation(1, manVSMachine);
+        if_4_pieces_in_line_white && win_animation(0, manVSMachine);
+        cancel = true;
       }
     }
     if (cancel) return false;
@@ -299,20 +290,27 @@ function render_board() {
     [[], [], [], []],
   ];
 
+  $(".big-btn-div").hide();
   $(".container").empty();
   $(".container-in-tutorial").empty();
+  $(".piece").attr("style", "pointer-events: auto;");
 
   $(".container").append(`
-    <span class="setting-section">
-      <a class="btn retract-btn disabled"><i class="fas fa-undo-alt"></i>悔棋</a> 
-      <a class="btn restart-btn disabled"><i class="fas fa-sync-alt"></i>重置</a>
-      <a class="btn setting-btn"><i class="fas fa-cog"></i>設定</a>
-    </span>
-    <div class="timer_section">
-      <div class="timer-bar-wrapper">
-        <div class="timer-bar black"></div>
+    <div class="info-div">
+      <span class="setting-section">
+        <a class="btn retract-btn disabled"><i class="fas fa-undo-alt"></i>悔棋</a> 
+        <a class="btn restart-btn disabled"><i class="fas fa-sync-alt"></i>重置</a>
+        <a class="btn setting-btn"><i class="fas fa-cog"></i>設定</a>
+      </span>
+      <div class="timer_section">
+        <div class="timer-bar-wrapper">
+          <div class="timer-bar black"></div>
+        </div>
+        <span class="timer-number" id="second_b">5</span>
       </div>
-      <span class="timer-number" id="second_b">5</span>
+      <a>
+        <i class="fas fa-ellipsis-v"></i>
+      </a>
     </div>
     <div class="piece-section">
       <div class="piece-stack" data-position="50">
@@ -372,17 +370,22 @@ function render_board() {
         <div class="piece" data-used="0" data-color="0" data-size="4"></div>
       </div>
     </div>
-    <div class="timer_section">
-      <div class="timer-bar-wrapper">
-        <div class="timer-bar white"></div>
+    <div class="info-div">
+      <div class="timer_section">
+        <div class="timer-bar-wrapper">
+          <div class="timer-bar white"></div>
+        </div>
+        <span class="timer-number" id="second_w">5</span>
       </div>
-      <span class="timer-number" id="second_w">5</span>
-    </div>
-    <span class="setting-section">
-      <a class="btn retract-btn disabled"><i class="fas fa-undo-alt"></i>悔棋</a>
-      <a class="btn restart-btn disabled"><i class="fas fa-sync-alt"></i>重置</a>
-      <a class="btn setting-btn"><i class="fas fa-cog"></i>設定</a>
-    </span>
+      <span class="setting-section">
+        <a class="btn retract-btn disabled"><i class="fas fa-undo-alt"></i>悔棋</a>
+        <a class="btn restart-btn disabled"><i class="fas fa-sync-alt"></i>重置</a>
+        <a class="btn setting-btn"><i class="fas fa-cog"></i>設定</a>
+      </span>
+      <a>
+        <i class="fas fa-ellipsis-v"></i>
+      </a>
+    </div
     `);
 
   $(".container-in-tutorial").append(`
@@ -455,19 +458,16 @@ function render_board() {
     // 選擇白色
     $(".container").attr("style", "--board-rotate: 0deg");
     $(
-      ".setting-section:first-of-type .retract-btn, .setting-section:first-of-type .restart-btn"
+      ".info-div:first-of-type .retract-btn, .info-div:first-of-type .restart-btn"
     ).hide();
   }
 
   if (manVSMachine === 0) {
     // 選擇黑色
     $(".container").attr("style", "--board-rotate: 180deg");
-    $(".setting-section:first-of-type .setting-btn").attr(
-      "style",
-      "display: inline;"
-    );
+    $(".info-div:first-of-type .setting-btn").attr("style", "display: inline;");
     $(
-      ".setting-section:last-of-type .setting-btn, .setting-section:last-of-type .retract-btn, .setting-section:last-of-type .restart-btn"
+      ".info-div:last-of-type .retract-btn, .info-div:last-of-type .restart-btn"
     ).hide();
   }
 }
@@ -639,8 +639,6 @@ $(document).on("click", ".retract-btn", function () {
     return false;
   }
 
-  if (!confirm("確定要悔一手嗎？")) return false;
-
   if (manVSMachine === 1 && move_record.length % 2 === 1) {
     retract_move(2);
   }
@@ -732,10 +730,8 @@ $(document).on("click", "body", function () {
   }
 });
 
-$(document).on("click", ".restart-btn", function () {
+$(document).on("click", ".restart-btn, .again", function () {
   if (move_record.length === 0) return false;
-
-  if (!confirm("確定要重置嗎？")) return false;
 
   render_board();
 
@@ -1128,3 +1124,107 @@ function tutor_animation_7() {
     tutor_animation_7();
   }, 2200);
 }
+
+$(document).on("click", ".fa-ellipsis-v", function () {
+  $(".info-div:first-of-type").animate({ top: "-=5rem" }, 120);
+  $(".info-div:first-of-type").animate({ top: "+=5rem" }, 120);
+
+  $(".timer_section").toggle();
+  $(".setting-section").toggle();
+
+  $(".info-div:last-of-type").animate({ top: "+=5rem" }, 120);
+  $(".info-div:last-of-type").animate({ top: "-=5rem" }, 120);
+});
+
+function win_animation(color, mode) {
+  let height = $(window).height();
+  let width = $(window).width();
+  let message;
+  let message_color;
+  let font_size_big = "24vmin";
+  let font_size_small = "16vmin";
+
+  $(".piece").attr("style", "pointer-events: none;");
+
+  if (mode === -1) {
+    color === 0 ? (message = "白方獲勝") : (message = "黑方獲勝");
+    message_color = "#32cc32";
+  } else {
+    color !== mode ? (message = "獲勝") : (message = "落敗");
+    color !== mode ? (message_color = "#32cc32") : (message_color = "#a2a2a2");
+  }
+
+  if (Math.min(width, height) > 560) {
+    font_size_big = "15vmin";
+    font_size_small = "10vmin";
+  }
+
+  $(".alert-animation").show();
+  $(".alert-message").html(message);
+  $(".alert-message").attr("style", `--color: ${message_color}`);
+
+  if (height < width) {
+    $(".alert-message, .bg-2").animate(
+      { top: "+=100vh" },
+      { duration: 600, easing: "linear" }
+    );
+    $(".bg-1").animate({ top: "-=100vh" }, { duration: 600, easing: "linear" });
+    $(".alert-message").animate(
+      { fontSize: font_size_big },
+      { duration: 400, easing: "linear" }
+    );
+    $(".alert-message").animate(
+      { fontSize: font_size_small },
+      { duration: 300, easing: "linear" }
+    );
+    $(".bg-1, .bg-2").delay(700).animate({ opacity: "0" }, { duration: 300 });
+    $(".alert-message").animate(
+      { left: "+=50vmax", top: "-=50vmax", fontSize: "5vmin" },
+      {
+        duration: 500,
+        complete: function () {
+          $(".alert-message, .bg-1, .bg-2").removeAttr("style");
+          $(".big-btn-div").show();
+          $(".alert-animation").hide();
+        },
+      }
+    );
+  } else {
+    $(".alert-message, .bg-2").animate(
+      { left: "-=100vw" },
+      { duration: 600, easing: "linear" }
+    );
+    $(".bg-1").animate(
+      { left: "+=100vw" },
+      { duration: 600, easing: "linear" }
+    );
+    $(".alert-message").animate(
+      { fontSize: font_size_big },
+      { duration: 400, easing: "linear" }
+    );
+    $(".alert-message").animate(
+      { fontSize: font_size_small },
+      { duration: 300, easing: "linear" }
+    );
+    $(".bg-1, .bg-2").delay(700).animate({ opacity: "0" }, { duration: 300 });
+    $(".alert-message").animate(
+      { left: "+=50vmax", top: "+=50vmax", fontSize: "5vmin" },
+      {
+        duration: 500,
+        complete: function () {
+          $(".alert-message, .bg-1, .bg-2").removeAttr("style");
+          $(".big-btn-div").show();
+          $(".alert-animation").hide();
+        },
+      }
+    );
+  }
+}
+
+$(".cancel").on("click", function () {
+  $(".big-btn-div").hide();
+});
+
+$(".rule-title").on("dblclick", function () {
+  $(".piece").attr("style", "pointer-events: auto;");
+});

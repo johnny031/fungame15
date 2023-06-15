@@ -1578,13 +1578,6 @@ function calc_cross_score(
         }
       }
 
-      console.log("這裡");
-      console.log(coordinate[0].toString() + coordinate[1].toString());
-      console.log(player_piece1_position);
-      console.log(player_piece2_position);
-      console.log(available_free_machine_pieces_out_of_line1);
-      console.log(available_free_machine_pieces_out_of_line2);
-
       // 若交叉點的我方棋子 >= 所有的玩家自由棋子
       // 關鍵連線1: 線外的最大的我方自由棋子 大於 線上的玩家棋子
       // 關鍵連線2: 線外的最大的我方自由棋子 大於 線上的玩家棋子

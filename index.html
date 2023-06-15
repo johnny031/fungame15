@@ -13,8 +13,16 @@
     <link rel="stylesheet" type="text/css" href="style.css" />
     <title>fungame15</title>
   </head>
-
   <body>
+    <div class="alert-animation">
+      <div class="alert-message">黑方獲勝</div>
+      <div class="bg-2"></div>
+      <div class="bg-1"></div>
+    </div>
+    <div class="big-btn-div">
+        <a class="big-btn again">再來<br />一局</a>
+        <a class="big-btn cancel">取消</a>
+    </div>
     <div class="container"></div>
     <div class="setting-div">
       <div class="setting-content">
@@ -70,11 +78,13 @@
       </div>
       <div class="tutorial-content">
         <a class="back-btn"><i class="fas fa-chevron-left"></i>返回</a>
-        <h1>規則</h1>
+        <h1 class="rule-title">規則</h1>
         <div class="rule-list">
           <ol>
             <li>每人有12顆棋子，共分為相等的3組，每組有由小到大的4個棋子</li>
-            <li>黑白雙方輪流落子，率先將4顆己方棋子連成一線者獲勝，直線、橫線、斜線皆可</li>
+            <li>
+              黑白雙方輪流落子，率先將4顆己方棋子連成一線者獲勝，直線、橫線、斜線皆可
+            </li>
             <li>玩家可將新的棋子，放在棋盤上任何一個空位</li>
             <div class="container-in-tutorial first"></div>
             <li>玩家可將新的棋子，蓋到自己在棋盤上較小的棋子上</li>
@@ -89,7 +99,9 @@
               玩家不可將新的棋子，蓋到棋盤上對方的棋子上，除非對方已經有3顆棋子連線
             </li>
             <div class="container-in-tutorial fifth"></div>
-            <li>若己方棋子蓋在對方4顆棋子的連線上，可移至其他較己方棋子小的棋子上</li>
+            <li>
+              若己方棋子蓋在對方4顆棋子的連線上，可移至其他較己方棋子小的棋子上
+            </li>
             <div class="container-in-tutorial sixth"></div>
             <li>若移動後，雙方同時連線，執行移動方落敗，對方獲勝 (下圖黑勝)</li>
             <div class="container-in-tutorial seventh"></div>
@@ -97,7 +109,6 @@
         </div>
       </div>
     </div>
-
     <div class="overlay"></div>
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
