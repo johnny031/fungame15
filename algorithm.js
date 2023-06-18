@@ -469,18 +469,26 @@ function calc_line_score(
 
     // 目前得到所有不在此線段的player方自由棋子: player_free_pieces_out_of_line
 
-    // 若其中有size比此線段machine方棋子大的，才扣分
     let already_minus = false;
 
-    loop1: for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        if (player_free_pieces_out_of_line[i][j].length !== 0) {
-          if (
-            player_free_pieces_out_of_line[i][j][1] > record[manVSMachine][0]
-          ) {
-            score -= 10000000000;
-            already_minus = true;
-            break loop1;
+    // 若我方棋子size<=2，扣分
+    if (record[manVSMachine][0] <= 2) {
+      score -= 10000000000;
+      already_minus = true;
+    }
+
+    // 若其中有size比此線段machine方棋子大的，才扣分
+    if (!already_minus) {
+      loop1: for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (player_free_pieces_out_of_line[i][j].length !== 0) {
+            if (
+              player_free_pieces_out_of_line[i][j][1] > record[manVSMachine][0]
+            ) {
+              score -= 10000000000;
+              already_minus = true;
+              break loop1;
+            }
           }
         }
       }
